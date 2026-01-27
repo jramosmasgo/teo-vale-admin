@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { ArrowLeft, User, Phone, MapPin, Mail, Calendar, DollarSign, FileText, Plus, Eye } from 'lucide-react';
+import { ArrowLeft, Phone, MapPin, Mail, Calendar, DollarSign, FileText, Plus, Eye } from 'lucide-react';
 import Modal from '../../components/ui/Modal';
 import './ClientDetails.scss';
 
@@ -10,10 +10,8 @@ const ClientDetails = () => {
     const location = useLocation();
     const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
     const [isOrdersListModalOpen, setIsOrdersListModalOpen] = useState(false);
-    const [isOrderDetailModalOpen, setIsOrderDetailModalOpen] = useState(false);
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const [isPaymentDetailModalOpen, setIsPaymentDetailModalOpen] = useState(false);
-    const [selectedOrder, setSelectedOrder] = useState<any>(null);
     const [selectedPayment, setSelectedPayment] = useState<any>(null);
 
     // Mock data - in real app fetch by ID
@@ -39,24 +37,6 @@ const ClientDetails = () => {
         { id: 4, date: "01/10/2023", time: "04:20 PM", amount: 10.00, type: 'payment', status: 'completed', user: 'Maria Caja' },
     ];
 
-    const getStatusLabel = (status: string) => {
-        switch (status) {
-            case 'unpaid': return 'No Pagado';
-            case 'incomplete': return 'Incompleto';
-            case 'completed': return 'Completado';
-            default: return status;
-        }
-    };
-
-    const getStatusClass = (status: string) => {
-        switch (status) {
-            case 'unpaid': return 'status-unpaid';
-            case 'incomplete': return 'status-incomplete';
-            case 'completed': return 'status-completed';
-            default: return '';
-        }
-    };
-
     const handleSaveOrder = (e: React.FormEvent) => {
         e.preventDefault();
         console.log("Saving order...");
@@ -68,24 +48,6 @@ const ClientDetails = () => {
         console.log("Saving payment...");
         setIsPaymentModalOpen(false);
     }
-
-    const handleViewOrder = (orderId: string) => {
-        if (orderId === '-') return;
-        // Mock fetching order details
-        setSelectedOrder({
-            id: orderId,
-            status: 'Activo',
-            startDate: '01/10/2023',
-            amount: 15.00,
-            days: ['Lunes', 'Miércoles', 'Viernes'],
-            shift: 'Mañana',
-            items: [
-                { name: 'Pan Francés x 5', price: 2.50 },
-                { name: 'Jugo de Naranja', price: 5.00 }
-            ]
-        });
-        setIsOrderDetailModalOpen(true);
-    };
 
     return (
         <div className="page-content client-details-page">
@@ -362,66 +324,6 @@ const ClientDetails = () => {
                         className="btn-link"
                         onClick={() => setIsOrdersListModalOpen(false)}
                         style={{ color: 'var(--text-secondary)' }}
-                    >
-                        Cerrar
-                    </button>
-                </div>
-            </Modal>
-
-            {/* Order Detail Modal */}
-            <Modal title={`Detalle del Pedido ${selectedOrder?.id || ''}`} isOpen={isOrderDetailModalOpen} onClose={() => setIsOrderDetailModalOpen(false)}>
-                {selectedOrder && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                            <div className="detail-item">
-                                <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Estado</label>
-                                <span className={`status-badge ${selectedOrder.status === 'Activo' ? 'active' : 'inactive'}`} style={{ width: 'fit-content' }}>
-                                    {selectedOrder.status}
-                                </span>
-                            </div>
-                            <div className="detail-item">
-                                <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Fecha Inicio</label>
-                                <p style={{ margin: 0, fontWeight: 500 }}>{selectedOrder.startDate}</p>
-                            </div>
-                            <div className="detail-item">
-                                <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Monto Diario</label>
-                                <p style={{ margin: 0, fontWeight: 500 }}>S/ {selectedOrder.amount.toFixed(2)}</p>
-                            </div>
-                            <div className="detail-item">
-                                <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Turno</label>
-                                <p style={{ margin: 0, fontWeight: 500 }}>{selectedOrder.shift}</p>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>Días de Entrega</label>
-                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                {selectedOrder.days.map((day: string) => (
-                                    <span key={day} style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-color)', padding: '0.25rem 0.75rem', borderRadius: '12px', fontSize: '0.85rem' }}>
-                                        {day}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
-                            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>Productos Incluidos</label>
-                            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                                {selectedOrder.items.map((item: any, idx: number) => (
-                                    <li key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px dashed var(--border-color)' }}>
-                                        <span>{item.name}</span>
-                                        <span style={{ fontWeight: 600 }}>S/ {item.price.toFixed(2)}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
-                )}
-                <div className="modal-footer" style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
-                    <button
-                        type="button"
-                        className="btn-primary"
-                        onClick={() => setIsOrderDetailModalOpen(false)}
                     >
                         Cerrar
                     </button>
