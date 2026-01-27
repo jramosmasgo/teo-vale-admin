@@ -1,0 +1,236 @@
+@import '../../styles/variables';
+
+.page-content {
+    .header-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+
+        h1 {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+    }
+
+    .table-actions-bar {
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+
+        .filters-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .search-box {
+            position: relative;
+            width: 300px;
+
+            input {
+                width: 100%;
+                padding: 0.5rem 1rem 0.5rem 2.5rem;
+                border-radius: 8px;
+                border: 1px solid var(--border-color);
+                background-color: var(--bg-primary);
+                color: var(--text-primary);
+
+                &:focus {
+                    outline: none;
+                    border-color: var(--accent-color);
+                }
+            }
+
+            svg {
+                position: absolute;
+                left: 0.75rem;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--text-secondary);
+            }
+        }
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+
+        th,
+        td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            color: var(--text-primary);
+            font-size: 0.95rem;
+
+            .badge {
+                padding: 0.25rem 0.75rem;
+                border-radius: 9999px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                display: inline-block;
+
+                &.pending {
+                    background-color: color-mix(in srgb, var(--warning-color), transparent 85%);
+                    color: var(--warning-color);
+                    border: 1px solid color-mix(in srgb, var(--warning-color), transparent 70%);
+                }
+
+                &.paid {
+                    background-color: color-mix(in srgb, var(--success-color), transparent 85%);
+                    color: var(--success-color);
+                    border: 1px solid color-mix(in srgb, var(--success-color), transparent 70%);
+                }
+            }
+        }
+    }
+}
+
+.btn-icon-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: transparent;
+
+    &.success {
+        color: var(--success-color);
+
+        &:hover {
+            background-color: color-mix(in srgb, var(--success-color), transparent 85%);
+        }
+    }
+
+    &.info {
+        color: #3b82f6;
+
+        &:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+    }
+}
+
+// Payment Details Modal Styles
+.payment-details-modal {
+    .amount-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-bottom: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+
+        .label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .amount {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--success-color);
+            background: linear-gradient(135deg, var(--success-color) 0%, darken(#22c55e, 10%) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .method-badge {
+            margin-top: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 1rem;
+            background-color: var(--bg-secondary);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            font-weight: 500;
+        }
+    }
+
+    .details-grid {
+        display: grid;
+        gap: 1.5rem;
+    }
+
+    .info-group {
+        h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .info-card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+
+            &.grid-2 {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1rem;
+            }
+
+            .info-item {
+                display: flex;
+                flex-direction: column;
+                gap: 0.25rem;
+
+                label {
+                    font-size: 0.75rem;
+                    color: var(--text-secondary);
+                }
+
+                p {
+                    font-weight: 500;
+                    color: var(--text-primary);
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+
+                    svg {
+                        color: var(--text-secondary);
+                        opacity: 0.7;
+                    }
+                }
+            }
+        }
+    }
+
+    .modal-footer {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: flex-end;
+    }
+}

@@ -1,0 +1,40 @@
+.client-layout {
+    min-height: 100vh;
+    background-color: var(--bg-primary);
+
+    .client-header {
+        height: 70px;
+        background-color: var(--bg-secondary);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 2rem;
+        box-shadow: var(--shadow-sm);
+        transition: padding 0.3s ease;
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        @media (max-width: 768px) {
+            padding: 0 1rem;
+
+            .logo {
+                font-size: 1.25rem;
+            }
+        }
+    }
+
+    .client-content {
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        transition: padding 0.3s ease;
+
+        @media (max-width: 768px) {
+            padding: 1rem;
+        }
+    }
+}

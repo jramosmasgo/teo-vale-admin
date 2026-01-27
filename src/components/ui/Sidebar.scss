@@ -1,0 +1,88 @@
+.sidebar {
+    width: 260px;
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 1rem;
+    z-index: 1000;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+
+    @media (max-width: 768px) {
+        transform: translateX(-100%);
+        width: 280px; // Slightly wider on mobile for better touch
+
+        &.open {
+            transform: translateX(0);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+    }
+
+    .sidebar-header {
+        margin-bottom: 3rem;
+        padding-left: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .close-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.5rem;
+
+            @media (max-width: 768px) {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+
+        .sidebar-logo {
+            width: 100%;
+            max-width: 180px;
+            height: auto;
+            object-fit: contain;
+        }
+    }
+
+    .sidebar-nav {
+        flex: 1;
+
+        ul {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        a {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            opacity: 0.8;
+
+            &:hover {
+                background-color: var(--sidebar-hover);
+                color: var(--sidebar-text);
+                opacity: 1;
+            }
+
+            &.active {
+                background-color: var(--sidebar-active);
+                color: var(--sidebar-active-text);
+                opacity: 1;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            }
+        }
+    }
+}

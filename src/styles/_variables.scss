@@ -1,0 +1,42 @@
+:root {
+  // Light Theme - Inspired by 'Teo y Vale' (Bakery)
+  --bg-primary: #F9F7F2; // Warm Cream
+  --bg-secondary: #FFFFFF;
+  --text-primary: #162E48; // Deep Navy (Logo Text)
+  --text-secondary: #64748B;
+  --accent-color: #D6A865; // Golden Wheat (Logo Highlights)
+  --accent-hover: #B88A4A;
+  --border-color: #E2E8F0;
+  --success-color: #10B981;
+  --warning-color: #F59E0B;
+  --danger-color: #EF4444;
+
+  // Sidebar - Light Theme
+  --sidebar-bg: #FFFFFF;
+  --sidebar-text: #334155;
+  --sidebar-hover: #F1F5F9;
+  --sidebar-active: #162E48; // Deep Navy for active item
+  --sidebar-active-text: #D6A865; // Gold text for active item
+
+  // Shadow (Warm undertone)
+  --shadow-sm: 0 1px 2px 0 rgb(22 46 72 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(22 46 72 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(22 46 72 / 0.1);
+}
+
+[data-theme='dark'] {
+  --bg-primary: #0B1724;
+  --bg-secondary: #162E48;
+  --text-primary: #F9F7F2;
+  --text-secondary: #94A3B8;
+  --accent-color: #D6A865;
+  --accent-hover: #EBC68C;
+  --border-color: #334155;
+
+  // Sidebar - Dark Theme
+  --sidebar-bg: #0F172A; // Rich Dark Navy
+  --sidebar-text: #CBD5E1;
+  --sidebar-hover: #1E293B;
+  --sidebar-active: #D6A865; // Gold for active item
+  --sidebar-active-text: #0F172A; // Dark text on Gold
+}
