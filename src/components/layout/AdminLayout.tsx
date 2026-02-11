@@ -1,11 +1,17 @@
 import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, Navigate } from 'react-router-dom';
 import Sidebar from '../ui/Sidebar';
 import Header from '../ui/Header';
 import './AdminLayout.scss';
+import { useAuth } from '../../context/AuthContext';
 
 const AdminLayout = () => {
+    const { isAuthenticated } = useAuth();
     const [isSidebarOpen, setSidebarOpen] = useState(false);
+
+    if (!isAuthenticated) {
+        return <Navigate to="/auth/login" replace />;
+    }
 
     return (
         <div className={`admin-layout ${isSidebarOpen ? 'layout-sidebar-open' : ''}`}>

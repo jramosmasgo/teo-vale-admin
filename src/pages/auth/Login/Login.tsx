@@ -2,23 +2,52 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Mail } from 'lucide-react';
 import './Login.scss';
-import { useTheme } from '../../context/ThemeContext';
-import logoLight from '../../assets/admin/admin-logo.png';
-import logoDark from '../../assets/admin/admin-logo-dark.png';
+import { useTheme } from '../../../context/ThemeContext';
+import { useAuth } from '../../../context/AuthContext';
+import { userApi } from '../../../api/user.api';
+import logoLight from '../../../assets/admin/admin-logo.png';
+import logoDark from '../../../assets/admin/admin-logo-dark.png';
 
 const Login = () => {
-    const navigate = useNavigate();
     const { theme } = useTheme();
+    const { login } = useAuth();
+    const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const logo = theme === 'dark' ? logoDark : logoLight;
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // TODO: Add actual authentication logic here
-        console.log('Login attempt:', { email, password });
-        navigate('/admin');
+        setError(null);
+        setIsLoading(true);
+
+        try {
+            const response = await userApi.login({ email, password });
+
+            // Adjust based on actual API response structure
+            // Assuming response contains user and token
+            if (response) {
+                // If the API returns the user object and token at the root or nested
+                // This might need adjustment if the API structure is different
+                // For now assuming: response = { token: '...', user: { ... } }
+                const { token, user } = response;
+
+                if (token && user) {
+                    login(user, token);
+                    navigate('/admin');
+                } else {
+                    setError('Respuesta del servidor inválida');
+                }
+            }
+        } catch (err: any) {
+            console.error('Login error:', err);
+            setError(err.response?.data?.message || 'Error al iniciar sesión. Verifique sus credenciales.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -59,8 +88,10 @@ const Login = () => {
                     </div>
                 </div>
 
-                <button type="submit" className="login-btn">
-                    Iniciar Sesión
+                {error && <div className="error-message" style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>}
+
+                <button type="submit" className="login-btn" disabled={isLoading}>
+                    {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
                 </button>
             </form>
         </div>

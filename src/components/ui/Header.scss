@@ -7,6 +7,8 @@
     background-color: var(--bg-secondary);
     border-bottom: 1px solid var(--border-color); // Optional based on design
 
+    @import './HeaderDropdown';
+
     .header-left {
         display: flex;
         align-items: center;

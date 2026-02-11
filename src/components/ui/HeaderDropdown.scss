@@ -1,0 +1,54 @@
+.user-profile-container {
+    .profile-dropdown {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        margin-top: 0.5rem;
+        background-color: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        min-width: 180px;
+        z-index: 50;
+        overflow: hidden;
+        animation: fadeIn 0.2s ease-out;
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            text-align: left;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+
+            &:hover {
+                background-color: var(--bg-hover);
+            }
+
+            &.logout-btn {
+                color: var(--danger-color);
+                border-top: 1px solid var(--border-color);
+
+                &:hover {
+                    background-color: var(--danger-bg-hover, rgba(220, 38, 38, 0.1));
+                }
+            }
+        }
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
