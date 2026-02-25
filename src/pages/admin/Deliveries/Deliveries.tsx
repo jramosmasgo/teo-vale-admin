@@ -355,7 +355,9 @@ const Deliveries = () => {
 
                         <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
                             <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: '0.75rem' }}>Descripción de la Orden</label>
-                            <p style={{ margin: 0, color: 'var(--text-primary)' }}>{selectedDelivery.order?.description || 'Sin descripción'}</p>
+                            <p style={{ margin: 0, color: 'var(--text-primary)' }}>
+                                {selectedDelivery.order?.items?.map(item => `${item.name} - S/ ${item.price?.toFixed(2)}`).join(' | ') || 'Sin descripción'}
+                            </p>
                         </div>
 
                         <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
