@@ -23,4 +23,21 @@ export const clientApi = {
     const response = await api.put<Client>(API_ROUTES.CLIENTS.UPDATE(id), client);
     return response.data;
   },
+
+  uploadProfileImage: async (id: string, imageFile: File) => {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+    
+    const response = await api.post(`/clients/${id}/upload-image`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  deleteProfileImage: async (id: string) => {
+    const response = await api.delete(`/clients/${id}/delete-image`);
+    return response.data;
+  },
 };

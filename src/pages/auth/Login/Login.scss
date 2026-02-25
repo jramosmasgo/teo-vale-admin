@@ -35,6 +35,10 @@
             .input-wrapper {
                 position: relative;
 
+                input {
+                    padding-left: 2.75rem;
+                }
+
                 .input-icon {
                     position: absolute;
                     left: 1rem;
@@ -42,32 +46,7 @@
                     transform: translateY(-50%);
                     color: var(--text-secondary);
                     pointer-events: none;
-                }
-
-                input {
-                    width: 100%;
-                    padding: 0.75rem 1rem 0.75rem 2.75rem;
-                    border-radius: 8px;
-                    border: 1px solid var(--border-color);
-                    background-color: var(--bg-primary);
-                    color: var(--text-primary);
-                    font-size: 0.95rem;
-                    transition: all 0.2s;
-                    box-sizing: border-box; // Ensure padding doesn't affect width
-
-                    &:focus {
-                        outline: none;
-                        border-color: var(--accent-color);
-                        box-shadow: 0 0 0 2px rgba(var(--accent-color), 0.1); // Assuming accent-color is hex, wrap in func if needed or precise hex
-                        // Since vars are hex, ring might simple border or shadow
-                        box-shadow: 0 0 0 3px var(--border-color); // fallback or specific style
-                        border-color: var(--accent-color);
-                    }
-
-                    &::placeholder {
-                        color: var(--text-secondary);
-                        opacity: 0.5;
-                    }
+                    z-index: 10;
                 }
             }
         }

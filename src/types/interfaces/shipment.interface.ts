@@ -7,7 +7,8 @@ export interface Shipment {
   client?: Client;
   status?: string;
   amount?: number;
-  isPaid?: boolean;
+  amountPaid?: number;
+  paymentStatus?: 'UNPAID' | 'COMPLETED' | 'INCOMPLETE';
   deliveryDate?: string;
   notes?: string;
   createdAt?: string;

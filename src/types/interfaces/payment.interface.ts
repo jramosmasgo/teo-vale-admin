@@ -9,6 +9,10 @@ export interface Payment {
   paymentTime?: string;
   paymentCode?: string;
   registeredBy?: string | User;
+  shipments?: Array<{
+    shipment: string;
+    amountApplied: number;
+  }>;
   createdAt?: string;
   updatedAt?: string;
 }

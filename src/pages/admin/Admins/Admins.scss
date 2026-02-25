@@ -55,16 +55,23 @@
             font-size: 0.95rem;
 
             .avatar-sm {
-                width: 32px;
-                height: 32px;
+                width: 38px;
+                height: 38px;
                 background-color: var(--accent-color);
                 color: white;
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 0.75rem;
+                font-size: 0.85rem;
                 font-weight: 600;
+                overflow: hidden;
+
+                img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
             }
 
             .badge-success {
@@ -97,6 +104,9 @@
 
         .input-wrapper {
             position: relative;
+            width: 100%;
+            display: flex;
+            align-items: center;
 
             svg {
                 position: absolute;
@@ -105,27 +115,36 @@
                 transform: translateY(-50%);
                 color: var(--text-secondary);
                 pointer-events: none;
+                z-index: 10;
             }
 
             input,
             select {
                 width: 100%;
-                padding: 0.75rem 1rem 0.75rem 2.5rem;
-                background-color: var(--bg-primary);
-                border: 1px solid var(--border-color);
-                border-radius: 8px;
-                color: var(--text-primary);
-                font-size: 0.95rem;
+                padding-left: 2.75rem;
+                padding-right: 2.75rem; // Espacio para el ojo a la derecha
+            }
+
+            .password-toggle {
+                position: absolute;
+                right: 35px; // Ajustado para que esté más adentro
+                top: 50%;
+                transform: translateY(-50%);
+                background: transparent;
+                border: none;
+                color: var(--text-secondary);
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 8px;
+                border-radius: 6px;
                 transition: all 0.2s;
+                z-index: 20;
 
-                &:focus {
-                    outline: none;
-                    border-color: var(--accent-color);
-                    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color), transparent 85%);
-                }
-
-                &::placeholder {
-                    color: var(--text-secondary);
+                &:hover {
+                    background-color: var(--bg-hover);
+                    color: var(--text-primary);
                 }
             }
         }

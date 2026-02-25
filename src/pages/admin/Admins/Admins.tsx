@@ -1,81 +1,135 @@
-import { useState } from 'react';
-import { Plus, User, Mail, Lock, Shield, Edit2, Trash2 } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Plus, User, Mail, Lock, Shield, Edit2, Trash2, MapPin, Eye, EyeOff } from 'lucide-react';
 import Modal from '../../../components/ui/Modal';
+import { userApi } from '../../../api/user.api';
+import type { User as UserInterface } from '../../../types/interfaces/user.interface';
+import toast from 'react-hot-toast';
 import './Admins.scss';
 
-interface Admin {
-    id: number;
-    name: string;
-    email: string;
-    role: 'admin' | 'editor';
-    status: 'active' | 'inactive';
-}
-
-const MOCK_ADMINS: Admin[] = [
-    { id: 1, name: 'Juan Perez', email: 'juan.perez@teovale.com', role: 'admin', status: 'active' },
-    { id: 2, name: 'Maria Campos', email: 'maria.campos@teovale.com', role: 'editor', status: 'active' },
-];
-
 const Admins = () => {
-    const [admins, setAdmins] = useState<Admin[]>(MOCK_ADMINS);
+    const [users, setUsers] = useState<UserInterface[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingId, setEditingId] = useState<number | null>(null);
+    const [showPassword, setShowPassword] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
     const [formData, setFormData] = useState({
-        name: '',
+        fullName: '',
         email: '',
-        role: 'editor',
-        password: ''
+        role: 'USER',
+        password: '',
+        phone: '',
+        address: '',
+        status: 'ACTIVE'
     });
+
+    const fetchUsers = useCallback(async () => {
+        try {
+            setIsLoading(true);
+            const data = await userApi.getAll(1, 50);
+            setUsers(data.users);
+
+        } catch (error) {
+            console.error('Error fetching users:', error);
+            toast.error('Error al cargar usuarios');
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchUsers();
+    }, [fetchUsers]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSaveAdmin = (e: React.FormEvent) => {
+    const handleSaveAdmin = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (editingId) {
-            console.log("Updating admin:", editingId, formData);
-            setAdmins(prev => prev.map(admin =>
-                admin.id === editingId
-                    ? { ...admin, name: formData.name, email: formData.email, role: formData.role as 'admin' | 'editor' }
-                    : admin
-            ));
-        } else {
-            console.log("Saving new admin:", formData);
-            const newAdmin: Admin = {
-                id: Date.now(),
-                name: formData.name,
-                email: formData.email,
-                role: formData.role as 'admin' | 'editor',
-                status: 'active'
-            };
-            setAdmins(prev => [...prev, newAdmin]);
+
+        try {
+            if (editingId) {
+                // Update existing user
+                const updateData: Partial<UserInterface> = {
+                    fullName: formData.fullName,
+                    email: formData.email,
+                    role: formData.role,
+                    phone: formData.phone,
+                    address: formData.address,
+                    status: formData.status
+                };
+
+                // Only include password if it was provided
+                if (formData.password) {
+                    updateData.password = formData.password;
+                }
+
+                await userApi.update(editingId, updateData);
+                toast.success('Usuario actualizado exitosamente');
+            } else {
+                // Create new user
+                await userApi.create({
+                    fullName: formData.fullName,
+                    email: formData.email,
+                    role: formData.role,
+                    password: formData.password,
+                    phone: formData.phone,
+                    address: formData.address,
+                    status: 'ACTIVE'
+                });
+                toast.success('Usuario creado exitosamente');
+            }
+
+            closeModal();
+            fetchUsers();
+        } catch (error: any) {
+            console.error('Error saving user:', error);
+            toast.error(error.response?.data?.message || 'Error al guardar usuario');
         }
-        closeModal();
     };
 
-    const handleEdit = (admin: Admin) => {
+    const handleEdit = (user: UserInterface) => {
         setFormData({
-            name: admin.name,
-            email: admin.email,
-            role: admin.role,
-            password: '' // Keep empty, only send if changing
+            fullName: user.fullName || '',
+            email: user.email || '',
+            role: user.role || 'USER',
+            password: '',
+            phone: user.phone || '',
+            address: user.address || '',
+            status: user.status || 'ACTIVE'
         });
-        setEditingId(admin.id);
+        setEditingId(user._id || null);
         setIsModalOpen(true);
     };
 
+    const handleDelete = async (userId: string, userName: string) => {
+        const confirmed = window.confirm(`¿Está seguro de eliminar al usuario "${userName}"? Esta acción no se puede deshacer.`);
+
+        if (!confirmed) return;
+
+        try {
+            await userApi.delete(userId);
+            toast.success('Usuario eliminado exitosamente');
+            fetchUsers();
+        } catch (error: any) {
+            console.error('Error deleting user:', error);
+            toast.error(error.response?.data?.message || 'Error al eliminar usuario');
+        }
+    };
+
     const openNewModal = () => {
-        setFormData({ name: '', email: '', role: 'editor', password: '' });
+        setFormData({ fullName: '', email: '', role: 'USER', password: '', phone: '', address: '', status: 'ACTIVE' });
         setEditingId(null);
         setIsModalOpen(true);
     };
 
     const closeModal = () => {
         setIsModalOpen(false);
-        setFormData({ name: '', email: '', role: 'editor', password: '' });
+        setFormData({ fullName: '', email: '', role: 'USER', password: '', phone: '', address: '', status: 'ACTIVE' });
         setEditingId(null);
+        setShowPassword(false);
     };
 
     return (
@@ -96,57 +150,76 @@ const Admins = () => {
 
             <div className="card">
                 <div className="table-container">
-                    <table className="data-table">
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Email</th>
-                                <th>Rol</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {admins.map((admin) => (
-                                <tr key={admin.id}>
-                                    <td>
-                                        <div className="flex items-center gap-3">
-                                            <div className="avatar-sm">
-                                                {admin.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                    {isLoading ? (
+                        <div style={{ textAlign: 'center', padding: '3rem' }}>Cargando usuarios...</div>
+                    ) : users.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
+                            No se encontraron usuarios registrados.
+                        </div>
+                    ) : (
+                        <table className="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Email</th>
+                                    <th>Rol</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {users.map((user) => (
+                                    <tr key={user._id}>
+                                        <td>
+                                            <div className="flex items-center gap-4">
+                                                <div className="avatar-sm">
+                                                    {user.profileImageUrl ? (
+                                                        <img src={user.profileImageUrl} alt={user.fullName} />
+                                                    ) : (
+                                                        (user.fullName || 'U').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+                                                    )}
+                                                </div>
+                                                <span className="font-medium">
+                                                    {user.fullName}
+                                                </span>
                                             </div>
-                                            <span className="font-medium">
-                                                {admin.name}
+                                        </td>
+                                        <td>{user.email}</td>
+                                        <td>
+                                            <div className="flex items-center gap-3">
+                                                <Shield size={14} className="text-text-secondary" />
+                                                {user.role === 'ADMIN' ? 'Super Admin' : 'Editor'}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span className={user.status === 'ACTIVE' ? 'badge-success' : 'badge-danger'}>
+                                                {user.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
                                             </span>
-                                        </div>
-                                    </td>
-                                    <td>{admin.email}</td>
-                                    <td>
-                                        <div className="flex items-center gap-2">
-                                            <Shield size={14} className="text-text-secondary" />
-                                            {admin.role === 'admin' ? 'Super Admin' : 'Editor'}
-                                        </div>
-                                    </td>
-                                    <td><span className="badge-success">Activo</span></td>
-                                    <td>
-                                        <div className="flex items-center gap-2">
-                                            <button
-                                                className="btn-icon-action info"
-                                                title="Editar"
-                                                onClick={() => handleEdit(admin)}
-                                            >
-                                                <Edit2 size={18} />
-                                            </button>
-                                            {admin.id !== 1 && (
-                                                <button className="btn-icon-action danger" style={{ color: 'var(--error-color)' }} title="Eliminar">
+                                        </td>
+                                        <td>
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    className="btn-icon-action info"
+                                                    title="Editar"
+                                                    onClick={() => handleEdit(user)}
+                                                >
+                                                    <Edit2 size={18} />
+                                                </button>
+                                                <button
+                                                    className="btn-icon-action danger"
+                                                    style={{ color: 'var(--error-color)' }}
+                                                    title="Eliminar"
+                                                    onClick={() => handleDelete(user._id || '', user.fullName || '')}
+                                                >
                                                     <Trash2 size={18} />
                                                 </button>
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
             </div>
 
@@ -162,9 +235,9 @@ const Admins = () => {
                             <User size={18} />
                             <input
                                 type="text"
-                                name="name"
+                                name="fullName"
                                 placeholder="Ej. Juan Perez"
-                                value={formData.name}
+                                value={formData.fullName}
                                 onChange={handleInputChange}
                                 required
                             />
@@ -196,9 +269,37 @@ const Admins = () => {
                                 onChange={handleInputChange}
                                 required
                             >
-                                <option value="editor">Editor (Acceso limitado)</option>
-                                <option value="admin">Administrador (Acceso total)</option>
+                                <option value="USER">Editor (Acceso limitado)</option>
+                                <option value="ADMIN">Administrador (Acceso total)</option>
                             </select>
+                        </div>
+                    </div>
+
+                    <div className="form-group">
+                        <label>Teléfono (Opcional)</label>
+                        <div className="input-wrapper">
+                            <Plus size={18} />
+                            <input
+                                type="text"
+                                name="phone"
+                                placeholder="Ej. 987654321"
+                                value={formData.phone}
+                                onChange={handleInputChange}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="form-group">
+                        <label>Dirección (Opcional)</label>
+                        <div className="input-wrapper">
+                            <MapPin size={18} />
+                            <input
+                                type="text"
+                                name="address"
+                                placeholder="Ej. Av. Siempre Viva 123"
+                                value={formData.address}
+                                onChange={handleInputChange}
+                            />
                         </div>
                     </div>
 
@@ -207,7 +308,7 @@ const Admins = () => {
                         <div className="input-wrapper">
                             <Lock size={18} />
                             <input
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 name="password"
                                 placeholder={editingId ? "Dejar en blanco para mantener" : "••••••••"}
                                 value={formData.password}
@@ -215,6 +316,14 @@ const Admins = () => {
                                 required={!editingId}
                                 minLength={6}
                             />
+                            <button
+                                type="button"
+                                className="password-toggle"
+                                onClick={() => setShowPassword(!showPassword)}
+                                title={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
+                            >
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
                         </div>
                     </div>
 
@@ -236,3 +345,4 @@ const Admins = () => {
     );
 };
 export default Admins;
+

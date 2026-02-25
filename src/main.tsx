@@ -14,6 +14,7 @@ import Deliveries from './pages/admin/Deliveries/Deliveries'
 import Payments from './pages/admin/Payments/Payments'
 import Admins from './pages/admin/Admins/Admins'
 import Profile from './pages/admin/Profile/Profile'
+import Expenses from './pages/admin/Expenses/Expenses'
 import ClientLayout from './components/layout/ClientLayout'
 import ClientPortal from './pages/client/ClientPortal/ClientPortal'
 
@@ -43,6 +44,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="deliveries" element={<Deliveries />} />
               <Route path="orders" element={<Orders />} />
               <Route path="payments" element={<Payments />} />
+              <Route path="expenses" element={<Expenses />} />
               <Route path="users" element={<Admins />} />
               <Route path="profile" element={<Profile />} />
             </Route>

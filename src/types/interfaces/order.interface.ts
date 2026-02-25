@@ -1,5 +1,10 @@
 import type { Client } from './client.interface';
 
+export interface OrderItem {
+  name: string;
+  price: number;
+}
+
 export interface Order {
   _id?: string;
   orderCode?: string;
@@ -7,7 +12,7 @@ export interface Order {
   orderDays?: string[];
   schedule?: string;
   amount?: number;
-  description?: string;
+  items?: OrderItem[];
   status?: boolean;
   createdAt?: string;
   updatedAt?: string;

@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Search, Filter, Pencil, DollarSign, Eye, User, Phone, MapPin, Calendar, Clock, FileText } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
+import { Search, Filter, Pencil, Plus, Eye, User, Phone, MapPin, Calendar, Clock, FileText, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import './Orders.scss';
 import Modal from '../../../components/ui/Modal';
@@ -7,6 +8,9 @@ import { orderApi } from '../../../api/order.api';
 import type { Order } from '../../../types/interfaces/order.interface';
 
 const Orders = () => {
+    const location = useLocation();
+    const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+
     const [orders, setOrders] = useState<Order[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -24,7 +28,6 @@ const Orders = () => {
         try {
             setIsLoading(true);
             const response = await orderApi.getAll(filters);
-            console.log(response);
             setOrders(response.orders);
         } catch (error) {
             console.error('Error fetching orders:', error);
@@ -34,10 +37,13 @@ const Orders = () => {
         }
     };
 
-    // Initial load
+    // Initialize filters from URL params
     useEffect(() => {
-        fetchOrders();
-    }, []);
+        const dayParam = queryParams.get('day');
+        if (dayParam) {
+            setDaysFilter([dayParam]);
+        }
+    }, [queryParams]);
 
     // Debounced search by client name
     useEffect(() => {
@@ -53,6 +59,32 @@ const Orders = () => {
         return () => clearTimeout(delayDebounceFn);
     }, [clientNameSearch, scheduleFilter, daysFilter]);
 
+    // Handle viewId from URL (for notifications)
+    useEffect(() => {
+        const viewId = queryParams.get('viewId');
+        if (!viewId) return;
+
+        const orderInList = orders.find(o => o._id === viewId);
+        if (orderInList) {
+            setSelectedOrder(orderInList);
+            setIsDetailModalOpen(true);
+        } else {
+            // Fetch single order if not in current list
+            const fetchSingleOrder = async () => {
+                try {
+                    const order = await orderApi.getById(viewId);
+                    if (order) {
+                        setSelectedOrder(order);
+                        setIsDetailModalOpen(true);
+                    }
+                } catch (error) {
+                    console.error('Error fetching single order:', error);
+                }
+            };
+            fetchSingleOrder();
+        }
+    }, [queryParams, orders]);
+
     const handleEdit = (orderId: string) => {
         const order = orders.find(o => o._id === orderId);
         if (order) {
@@ -62,10 +94,36 @@ const Orders = () => {
                 amount: order.amount,
                 schedule: order.schedule,
                 orderDays: order.orderDays || [],
-                description: order.description,
+                items: order.items || [],
             });
             setIsEditModalOpen(true);
         }
+    };
+
+    const handleAddItem = () => {
+        setFormData(prev => ({
+            ...prev,
+            items: [...(prev.items || []), { name: '', price: 0 }]
+        }));
+    };
+
+    const handleRemoveItem = (index: number) => {
+        setFormData(prev => ({
+            ...prev,
+            items: (prev.items || []).filter((_, i) => i !== index)
+        }));
+    };
+
+    const handleItemChange = (index: number, field: 'name' | 'price', value: string | number) => {
+        setFormData(prev => {
+            const newItems = [...(prev.items || [])];
+            newItems[index] = { ...newItems[index], [field]: value };
+
+            // Recalculate amount
+            const newAmount = newItems.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
+
+            return { ...prev, items: newItems, amount: newAmount };
+        });
     };
 
     const handleViewDetails = (orderId: string) => {
@@ -81,10 +139,7 @@ const Orders = () => {
         'THURSDAY': 'Jue', 'FRIDAY': 'Vie', 'SATURDAY': 'Sab', 'SUNDAY': 'Dom'
     };
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    };
+
 
     const handleScheduleChange = (schedule: string) => {
         setFormData(prev => ({ ...prev, schedule }));
@@ -169,15 +224,6 @@ const Orders = () => {
                             className="filter-select"
                             value={scheduleFilter}
                             onChange={(e) => setScheduleFilter(e.target.value)}
-                            style={{
-                                padding: '0.5rem 1rem',
-                                borderRadius: '8px',
-                                border: '1px solid var(--border-color)',
-                                background: 'var(--bg-primary)',
-                                color: 'var(--text-primary)',
-                                outline: 'none',
-                                cursor: 'pointer'
-                            }}
                         >
                             <option value="">Turnos (Todos)</option>
                             <option value="morning">Mañana</option>
@@ -188,15 +234,6 @@ const Orders = () => {
                             className="filter-select"
                             value={daysFilter.length === 1 ? daysFilter[0] : ''}
                             onChange={(e) => setDaysFilter(e.target.value ? [e.target.value] : [])}
-                            style={{
-                                padding: '0.5rem 1rem',
-                                borderRadius: '8px',
-                                border: '1px solid var(--border-color)',
-                                background: 'var(--bg-primary)',
-                                color: 'var(--text-primary)',
-                                outline: 'none',
-                                cursor: 'pointer'
-                            }}
                         >
                             <option value="">Días (Todos)</option>
                             {Object.entries(dayLabels).map(([value, label]) => (
@@ -286,17 +323,61 @@ const Orders = () => {
                 {selectedOrder && (
                     <form onSubmit={handleSave}>
                         <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: 'var(--text-secondary)' }}>Monto (S/)</label>
-                            <div className="input-wrapper" style={{ position: 'relative' }}>
-                                <DollarSign size={18} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-                                <input
-                                    type="number"
-                                    name="amount"
-                                    step="0.10"
-                                    value={formData.amount || ''}
-                                    onChange={handleInputChange}
-                                    style={{ width: '100%', paddingLeft: '2.5rem', paddingRight: '1rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', border: '1px solid var(--border-color)', borderRadius: '8px', background: 'var(--bg-primary)', color: 'var(--text-primary)' }}
-                                />
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--text-primary)', fontSize: '1.1rem' }}>Items del Pedido</label>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                {(formData.items || []).map((item, index) => (
+                                    <div key={index} style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+                                        <div style={{ flex: 1 }}>
+                                            <input
+                                                type="text"
+                                                placeholder="Nombre del item"
+                                                value={item.name}
+                                                onChange={(e) => handleItemChange(index, 'name', e.target.value)}
+                                                style={{ width: '100%' }}
+                                                required
+                                            />
+                                        </div>
+                                        <div style={{ width: '120px' }}>
+                                            <div className="input-wrapper" style={{ position: 'relative' }}>
+                                                <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>S/</span>
+                                                <input
+                                                    type="number"
+                                                    step="0.10"
+                                                    placeholder="0.00"
+                                                    value={item.price || ''}
+                                                    onChange={(e) => handleItemChange(index, 'price', parseFloat(e.target.value))}
+                                                    style={{ paddingLeft: '1.75rem', width: '100%' }}
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveItem(index)}
+                                            className="btn-action danger"
+                                            style={{ marginTop: '8px' }}
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    </div>
+                                ))}
+                                <button
+                                    type="button"
+                                    onClick={handleAddItem}
+                                    className="btn-secondary"
+                                    style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem' }}
+                                >
+                                    <Plus size={16} /> Agregar Item
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="form-group" style={{ marginBottom: '1.5rem', padding: '1rem', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>Monto Total:</span>
+                                <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--accent-color)' }}>
+                                    S/ {(formData.amount || 0).toFixed(2)}
+                                </span>
                             </div>
                         </div>
 
@@ -350,17 +431,7 @@ const Orders = () => {
                             </div>
                         </div>
 
-                        <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: 'var(--text-secondary)' }}>Descripción</label>
-                            <textarea
-                                rows={3}
-                                name="description"
-                                value={formData.description || ''}
-                                onChange={handleInputChange}
-                                placeholder="Detalles del pedido..."
-                                style={{ width: '100%', padding: '0.75rem', border: '1px solid var(--border-color)', borderRadius: '8px', background: 'var(--bg-primary)', color: 'var(--text-primary)', resize: 'vertical', fontFamily: 'inherit' }}
-                            />
-                        </div>
+
 
                         <div className="modal-footer" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
                             <button
@@ -452,10 +523,31 @@ const Orders = () => {
                             </div>
 
                             <div className="detail-item" style={{ marginTop: '1rem' }}>
-                                <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Descripción / Notas</label>
-                                <p style={{ margin: 0, padding: '0.75rem', background: 'var(--bg-primary)', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.9rem', fontStyle: selectedOrder.description ? 'normal' : 'italic', color: selectedOrder.description ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
-                                    {selectedOrder.description || 'Sin descripción adicional.'}
-                                </p>
+                                <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>Items del Pedido</label>
+                                <div style={{ background: 'var(--bg-primary)', borderRadius: '12px', border: '1px solid var(--border-color)', overflow: 'hidden' }}>
+                                    {selectedOrder.items && selectedOrder.items.length > 0 ? (
+                                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                            <thead>
+                                                <tr style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-color)' }}>
+                                                    <th style={{ textAlign: 'left', padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Item</th>
+                                                    <th style={{ textAlign: 'right', padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Precio</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {selectedOrder.items.map((item, index) => (
+                                                    <tr key={index} style={{ borderBottom: index === selectedOrder.items!.length - 1 ? 'none' : '1px solid var(--border-color)' }}>
+                                                        <td style={{ padding: '0.75rem 1rem' }}>{item.name}</td>
+                                                        <td style={{ textAlign: 'right', padding: '0.75rem 1rem', fontWeight: 500 }}>S/ {item.price.toFixed(2)}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    ) : (
+                                        <p style={{ margin: 0, padding: '1rem', textAlign: 'center', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                                            No hay items registrados.
+                                        </p>
+                                    )}
+                                </div>
                             </div>
                         </div>
 

@@ -3,8 +3,9 @@ import { API_ROUTES } from '../types/api.routes';
 import type { Payment } from '../types/interfaces/payment.interface';
 
 export const paymentApi = {
-  getAll: async () => {
-    const response = await api.get<Payment[]>(API_ROUTES.PAYMENTS.GET_ALL);
+  getAll: async (page: number = 1, limit: number = 15, filters: { paymentDate?: string; clientId?: string; registeredBy?: string; clientName?: string } = {}) => {
+    const params = { page, limit, ...filters };
+    const response = await api.get<{ payments: Payment[], total: number }>(API_ROUTES.PAYMENTS.GET_ALL, { params });
     return response.data;
   },
 

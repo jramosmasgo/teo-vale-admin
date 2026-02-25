@@ -3,7 +3,7 @@ export interface User {
   fullName?: string;
   email?: string;
   phone?: string;
-  profileImageUrl?: string;
+  profileImageUrl?: string; // Cloudinary image URL
   password?: string;
   role?: string;
   status?: string;
