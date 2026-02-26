@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search, Pencil, XCircle, CheckCircle, Eye, Loader2, Calendar, DollarSign, History as HistoryIcon, Clock, User, FileDown, MessageSquare } from 'lucide-react';
+import { Search, Pencil, XCircle, CheckCircle, Eye, Loader2, DollarSign, History as HistoryIcon, Clock, User, FileDown, MessageSquare } from 'lucide-react';
 import './Deliveries.scss';
 import Modal from '../../../components/ui/Modal';
 import { shipmentApi } from '../../../api/shipment.api';
-import { orderApi } from '../../../api/order.api';
 import type { Shipment } from '../../../types/interfaces/shipment.interface';
 import { toast } from 'react-hot-toast';
 import { excelApi } from '../../../api/excel.api';

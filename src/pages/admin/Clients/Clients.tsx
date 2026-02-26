@@ -1,6 +1,6 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, Pencil, Search, Filter, Plus, User, PlusCircle } from 'lucide-react';
+import { Eye, Pencil, Search, Filter, Plus } from 'lucide-react';
 import Modal from '../../../components/ui/Modal';
 import { clientApi } from '../../../api/client.api';
 import type { Client } from '../../../types/interfaces/client.interface';
