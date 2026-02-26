@@ -581,6 +581,38 @@
                         .price-col {
                             text-align: right;
                         }
+
+                        @media (max-width: 480px) {
+                            thead {
+                                display: none;
+                            }
+
+                            tr {
+                                display: block;
+                                padding: 0.75rem;
+                            }
+
+                            td {
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: center;
+                                padding: 0.4rem 0;
+                                border: none;
+                                text-align: right;
+
+                                &::before {
+                                    content: attr(data-label);
+                                    font-weight: 700;
+                                    color: var(--text-secondary);
+                                    font-size: 0.75rem;
+                                    text-transform: uppercase;
+                                }
+
+                                &.price-col {
+                                    text-align: right;
+                                }
+                            }
+                        }
                     }
                 }
             }

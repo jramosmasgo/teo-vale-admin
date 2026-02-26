@@ -390,8 +390,8 @@ const ClientPortal = () => {
                                                 <tbody>
                                                     {selectedOrder.items.map((item: any, index: number) => (
                                                         <tr key={index}>
-                                                            <td>{item.name}</td>
-                                                            <td className="price-col">S/ {item.price.toFixed(2)}</td>
+                                                            <td data-label="Producto">{item.name}</td>
+                                                            <td data-label="Precio" className="price-col">S/ {item.price.toFixed(2)}</td>
                                                         </tr>
                                                     ))}
                                                 </tbody>

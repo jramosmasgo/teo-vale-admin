@@ -172,19 +172,19 @@ const Payments = () => {
                                 <tbody>
                                     {payments.map((payment) => (
                                         <tr key={payment._id}>
-                                            <td className="font-medium">{payment.paymentCode}</td>
-                                            <td>{typeof payment.client === 'object' ? (payment.client as Client).fullName : 'N/A'}</td>
-                                            <td className="font-semibold" style={{ textAlign: 'right' }}>
+                                            <td data-label="Código" className="font-medium">{payment.paymentCode}</td>
+                                            <td data-label="Cliente">{typeof payment.client === 'object' ? (payment.client as Client).fullName : 'N/A'}</td>
+                                            <td data-label="Monto" className="font-semibold" style={{ textAlign: 'right' }}>
                                                 S/ {(payment.amountPaid || 0).toFixed(2)}
                                             </td>
-                                            <td style={{ textAlign: 'center' }}>
+                                            <td data-label="Fecha" style={{ textAlign: 'center' }}>
                                                 {payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : '-'}
                                             </td>
-                                            <td style={{ textAlign: 'center' }}>{payment.paymentTime || '-'}</td>
-                                            <td style={{ textAlign: 'center' }}>
+                                            <td data-label="Hora" style={{ textAlign: 'center' }}>{payment.paymentTime || '-'}</td>
+                                            <td data-label="Registrado Por" style={{ textAlign: 'center' }}>
                                                 {typeof payment.registeredBy === 'object' ? (payment.registeredBy as UserInterface).fullName : 'N/A'}
                                             </td>
-                                            <td>
+                                            <td data-label="Acciones">
                                                 <div className="flex items-center justify-center gap-2">
                                                     <button
                                                         className="btn-icon-action info"

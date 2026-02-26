@@ -59,34 +59,8 @@ const Orders = () => {
         return () => clearTimeout(delayDebounceFn);
     }, [clientNameSearch, scheduleFilter, daysFilter]);
 
-    // Handle viewId from URL (for notifications)
-    useEffect(() => {
-        const viewId = queryParams.get('viewId');
-        if (!viewId) return;
-
-        const orderInList = orders.find(o => o._id === viewId);
-        if (orderInList) {
-            setSelectedOrder(orderInList);
-            setIsDetailModalOpen(true);
-        } else {
-            // Fetch single order if not in current list
-            const fetchSingleOrder = async () => {
-                try {
-                    const order = await orderApi.getById(viewId);
-                    if (order) {
-                        setSelectedOrder(order);
-                        setIsDetailModalOpen(true);
-                    }
-                } catch (error) {
-                    console.error('Error fetching single order:', error);
-                }
-            };
-            fetchSingleOrder();
-        }
-    }, [queryParams, orders]);
-
-    const handleEdit = (orderId: string) => {
-        const order = orders.find(o => o._id === orderId);
+    const handleEdit = (orderId: string, orderToEdit?: Order) => {
+        const order = orderToEdit || orders.find(o => o._id === orderId);
         if (order) {
             setSelectedOrder(order);
             setFormData({
@@ -99,6 +73,43 @@ const Orders = () => {
             setIsEditModalOpen(true);
         }
     };
+
+    // Handle initial editId or viewId from URL
+    useEffect(() => {
+        const editId = queryParams.get('editId');
+        const viewId = queryParams.get('viewId');
+
+        if (!editId && !viewId) return;
+
+        const targetId = editId || viewId;
+        const isEdit = !!editId;
+
+        const orderInList = orders.find(o => o._id === targetId);
+        if (orderInList) {
+            if (isEdit) handleEdit(targetId!, orderInList);
+            else {
+                setSelectedOrder(orderInList);
+                setIsDetailModalOpen(true);
+            }
+        } else if (targetId) {
+            // Fetch single order if not in current list
+            const fetchSingleOrder = async () => {
+                try {
+                    const order = await orderApi.getById(targetId);
+                    if (order) {
+                        if (isEdit) handleEdit(targetId, order);
+                        else {
+                            setSelectedOrder(order);
+                            setIsDetailModalOpen(true);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error fetching single order:', error);
+                }
+            };
+            fetchSingleOrder();
+        }
+    }, [queryParams, orders]);
 
     const handleAddItem = () => {
         setFormData(prev => ({
@@ -271,10 +282,10 @@ const Orders = () => {
                         <tbody>
                             {orders.map((order) => (
                                 <tr key={order._id}>
-                                    <td className="font-medium">{order.orderCode}</td>
-                                    <td>{(order.client as any)?.fullName || 'Cliente'}</td>
-                                    <td>{order.createdAt ? new Date(order.createdAt).toLocaleDateString() : '-'}</td>
-                                    <td>
+                                    <td data-label="Pedido" className="font-medium">{order.orderCode}</td>
+                                    <td data-label="Cliente">{(order.client as any)?.fullName || 'Cliente'}</td>
+                                    <td data-label="Fecha Creación">{order.createdAt ? new Date(order.createdAt).toLocaleDateString() : '-'}</td>
+                                    <td data-label="Días">
                                         <div className="flex gap-1 flex-wrap">
                                             {order.orderDays?.map(day => (
                                                 <span key={day} style={{ fontSize: '0.75rem', padding: '2px 6px', background: 'var(--bg-secondary)', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
@@ -283,13 +294,13 @@ const Orders = () => {
                                             ))}
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="Turno">
                                         <span style={{ fontSize: '0.85rem', padding: '4px 8px', borderRadius: '12px', background: order.schedule === 'morning' ? '#e0f2fe' : '#fef3c7', color: order.schedule === 'morning' ? '#0369a1' : '#b45309', border: `1px solid ${order.schedule === 'morning' ? '#bae6fd' : '#fde68a'}` }}>
                                             {order.schedule === 'morning' ? 'Mañana' : 'Tarde'}
                                         </span>
                                     </td>
-                                    <td className="font-semibold">S/ {order.amount?.toFixed(2)}</td>
-                                    <td>
+                                    <td data-label="Monto (S/.)" className="font-semibold">S/ {order.amount?.toFixed(2)}</td>
+                                    <td data-label="Acciones">
                                         <div className="flex gap-2">
                                             <button
                                                 className="btn-action info"

@@ -336,14 +336,21 @@
     }
 }
 
-@media (max-width: 992px) {
+@media (max-width: 768px) {
     .expenses-page {
         padding: 1rem;
 
         .page-header {
             flex-direction: column;
-            align-items: flex-start;
-            gap: 1rem;
+            align-items: stretch;
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+
+            .header-content {
+                h1 {
+                    font-size: 1.5rem;
+                }
+            }
 
             .btn-primary {
                 width: 100%;
@@ -351,17 +358,28 @@
             }
         }
 
+        .stats-summary {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
         .filters-bar {
             flex-direction: column;
             align-items: stretch;
+            padding: 1rem;
+            gap: 1rem;
 
             .filter-group {
 
                 select,
                 input {
-                    min-width: unset;
                     width: 100%;
                 }
+            }
+
+            .btn-clear {
+                width: 100%;
+                text-align: center;
             }
         }
 
@@ -369,59 +387,54 @@
             display: block;
 
             thead {
-                display: none; // Hide headers on mobile
+                display: none;
             }
 
             tbody {
                 display: block;
+            }
 
-                tr {
-                    display: flex;
-                    flex-direction: column;
-                    background: var(--bg-primary);
-                    border: 1px solid var(--border-color);
-                    border-radius: 12px;
-                    margin-bottom: 1rem;
-                    padding: 1rem;
-                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            tr {
+                display: block;
+                padding: 1.25rem 1rem;
+                border: none;
+                border-bottom: 1px solid var(--border-color);
+                background: transparent;
+                box-shadow: none;
+                border-radius: 0;
 
-                    td {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        padding: 0.5rem 0;
-                        border: none;
-                        text-align: right;
+                &:last-child {
+                    border-bottom: none;
+                }
+            }
 
-                        &::before {
-                            content: attr(data-label);
-                            font-weight: 700;
-                            color: var(--text-secondary);
-                            font-size: 0.8rem;
-                            text-transform: uppercase;
-                            text-align: left;
-                        }
+            td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.5rem 0;
+                border: none;
+                font-size: 0.95rem;
+                text-align: right;
 
-                        &.amount {
-                            font-size: 1.1rem;
-                        }
+                &::before {
+                    content: attr(data-label);
+                    font-weight: 700;
+                    color: var(--text-secondary);
+                    font-size: 0.8rem;
+                    text-transform: uppercase;
+                    margin-right: 1rem;
+                    text-align: left;
+                    flex-shrink: 0;
+                }
 
-                        .actions {
-                            width: 100%;
-                            justify-content: flex-end;
-                            margin-top: 0.5rem;
-                            padding-top: 0.5rem;
-                            border-top: 1px solid var(--border-color);
-                        }
-                    }
+                &.amount {
+                    font-size: 1.1rem;
+                }
 
-                    // Specific styling for category badge in mobile list
-                    [data-label="Categoría"] {
-                        order: -1; // Bring category to top
-                        border-bottom: 1px solid var(--border-color);
-                        padding-bottom: 0.75rem;
-                        margin-bottom: 0.25rem;
-                    }
+                .actions {
+                    justify-content: flex-end;
+                    margin-top: 0.25rem;
                 }
             }
         }

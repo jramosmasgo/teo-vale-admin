@@ -142,8 +142,8 @@ const Clients = () => {
                     </button>
                 </div>
 
-                {/* Desktop Table */}
-                <div className="table-container desktop-view">
+                {/* Responsive Table */}
+                <div className="table-container">
                     {isLoading ? (
                         <div className="p-4 text-center">Cargando clientes...</div>
                     ) : (
@@ -161,7 +161,7 @@ const Clients = () => {
                             <tbody>
                                 {clients.map((client) => (
                                     <tr key={client._id}>
-                                        <td>
+                                        <td data-label="Acciones">
                                             <div className="action-buttons" style={{ justifyContent: 'center' }}>
                                                 <button
                                                     className="action-btn view"
@@ -179,17 +179,17 @@ const Clients = () => {
                                                 </button>
                                             </div>
                                         </td>
-                                        <td>{client.fullName}</td>
-                                        <td>
+                                        <td data-label="Nombre">{client.fullName}</td>
+                                        <td data-label="Nickname">
                                             <div className="flex items-center gap-3">
                                                 <span className="font-medium">{client.alias || '-'}</span>
                                             </div>
                                         </td>
-                                        <td className="max-w-[200px] truncate" title={client.address}>
+                                        <td data-label="Dirección" className="max-w-[200px] truncate" title={client.address}>
                                             {client.address || '-'}
                                         </td>
-                                        <td>{client.phone || '-'}</td>
-                                        <td>
+                                        <td data-label="Celular">{client.phone || '-'}</td>
+                                        <td data-label="Estado">
                                             <span className={`badge ${client.active ? 'badge-success' : 'badge-danger'}`}>
                                                 {client.active ? 'Activo' : 'Inactivo'}
                                             </span>
@@ -206,75 +206,25 @@ const Clients = () => {
                     )}
                 </div>
 
-                {/* Mobile List View - Dark Theme Row Design */}
-                <div className="mobile-view dark-theme-list">
-                    <div className="search-bar-mobile">
-                        <Search size={20} />
-                        <input
-                            type="text"
-                            placeholder="Buscar clientes..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-
-                    {isLoading ? (
-                        <div className="p-4 text-center">Cargando...</div>
-                    ) : (
-                        clients.map((client) => {
-                            // Split name for stacking if needed, or just let CSS handle wrapping
-                            const nameParts = (client.fullName || '').split(' ');
-                            const firstName = nameParts[0] || 'Cliente';
-                            const lastName = nameParts.slice(1).join(' ');
-
-                            return (
-                                <div
-                                    key={client._id}
-                                    className="mobile-client-row"
-                                    onClick={() => navigate(`/admin/clients/${client._id}`)}
-                                >
-                                    {/* LEFT SIDE */}
-                                    <div className="row-left">
-                                        {/* Icon */}
-                                        <div className="col-icon">
-                                            <User size={24} strokeWidth={1.5} />
-                                        </div>
-
-                                        {/* Main info */}
-                                        <div className="col-info">
-                                            <div className="col-name">
-                                                <span className="name-top">{firstName}</span>
-                                                <span className="name-bottom">{lastName}</span>
-                                            </div>
-
-                                            <div className="col-nick">
-                                                <span className="lbl">Nick:</span>
-                                                <span className="val">{client.alias || '-'}</span>
-                                            </div>
-
-                                            <div className="col-phone">
-                                                {client.phone}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* RIGHT SIDE */}
-                                    <div className="col-action">
-                                        <PlusCircle size={22} className="action-icon" />
-                                    </div>
-                                </div>
-                            );
-                        })
-                    )}
-
-                    {/* Floating Add Button */}
-                    <button
-                        className="floating-fab"
-                        onClick={handleCreate}
-                    >
-                        <Plus size={28} />
-                    </button>
-                </div>
+                {/* Floating Add Button for Mobile */}
+                <button
+                    className="floating-fab mobile-only"
+                    onClick={handleCreate}
+                    style={{
+                        position: 'fixed',
+                        bottom: '2rem',
+                        right: '2rem',
+                        width: '56px',
+                        height: '56px',
+                        borderRadius: '50%',
+                        display: 'none', // Hidden by default, shown via CSS or style
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 50
+                    }}
+                >
+                    <Plus size={28} />
+                </button>
             </div>
 
             <Modal

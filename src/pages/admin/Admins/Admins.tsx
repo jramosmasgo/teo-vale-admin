@@ -170,7 +170,7 @@ const Admins = () => {
                             <tbody>
                                 {users.map((user) => (
                                     <tr key={user._id}>
-                                        <td>
+                                        <td data-label="Nombre">
                                             <div className="flex items-center gap-4">
                                                 <div className="avatar-sm">
                                                     {user.profileImageUrl ? (
@@ -184,19 +184,19 @@ const Admins = () => {
                                                 </span>
                                             </div>
                                         </td>
-                                        <td>{user.email}</td>
-                                        <td>
+                                        <td data-label="Email">{user.email}</td>
+                                        <td data-label="Rol">
                                             <div className="flex items-center gap-3">
                                                 <Shield size={14} className="text-text-secondary" />
                                                 {user.role === 'ADMIN' ? 'Super Admin' : 'Editor'}
                                             </div>
                                         </td>
-                                        <td>
+                                        <td data-label="Estado">
                                             <span className={user.status === 'ACTIVE' ? 'badge-success' : 'badge-danger'}>
                                                 {user.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
                                             </span>
                                         </td>
-                                        <td>
+                                        <td data-label="Acciones">
                                             <div className="flex items-center gap-2">
                                                 <button
                                                     className="btn-icon-action info"

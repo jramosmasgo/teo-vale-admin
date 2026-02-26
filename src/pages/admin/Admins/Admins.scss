@@ -85,6 +85,72 @@
             }
         }
     }
+
+    @media (max-width: 768px) {
+        .header-actions {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            button {
+                width: 100%;
+                justify-content: center;
+                display: flex !important; // Asegurar visibilidad
+            }
+        }
+
+        .data-table {
+            display: block;
+
+            thead {
+                display: none;
+            }
+
+            tbody {
+                display: block;
+            }
+
+            tr {
+                display: block;
+                padding: 1.25rem 1rem;
+                border-bottom: 1px solid var(--border-color);
+
+                &:last-child {
+                    border-bottom: none;
+                }
+            }
+
+            td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.5rem 0;
+                border: none;
+                font-size: 0.95rem;
+                text-align: right;
+
+                &::before {
+                    content: attr(data-label);
+                    font-weight: 700;
+                    color: var(--text-secondary);
+                    font-size: 0.8rem;
+                    text-transform: uppercase;
+                    margin-right: 1rem;
+                    text-align: left;
+                    flex-shrink: 0;
+                }
+
+                .flex.items-center.gap-4 {
+                    justify-content: flex-end;
+                }
+            }
+        }
+    }
 }
 
 // Modal Form Styles

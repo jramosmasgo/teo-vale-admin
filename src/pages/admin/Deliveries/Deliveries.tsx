@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Search, Pencil, XCircle, CheckCircle, Eye, Loader2, Calendar, DollarSign, History as HistoryIcon, Clock, User, FileDown } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Search, Pencil, XCircle, CheckCircle, Eye, Loader2, Calendar, DollarSign, History as HistoryIcon, Clock, User, FileDown, MessageSquare } from 'lucide-react';
 import './Deliveries.scss';
 import Modal from '../../../components/ui/Modal';
 import { shipmentApi } from '../../../api/shipment.api';
@@ -11,6 +11,7 @@ import { excelApi } from '../../../api/excel.api';
 
 const Deliveries = () => {
     const location = useLocation();
+    const navigate = useNavigate();
     const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
 
     const [shipments, setShipments] = useState<Shipment[]>([]);
@@ -30,6 +31,8 @@ const Deliveries = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isEditingAmount, setIsEditingAmount] = useState(false);
     const [editableAmount, setEditableAmount] = useState<number>(0);
+    const [editableNotes, setEditableNotes] = useState<string>('');
+    const [isAskingToEditOrder, setIsAskingToEditOrder] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
 
     const fetchDeliveries = useCallback(async () => {
@@ -108,7 +111,9 @@ const Deliveries = () => {
     const handleEdit = (delivery: Shipment) => {
         setSelectedDelivery(delivery);
         setEditableAmount(delivery.amount || 0);
+        setEditableNotes(delivery.notes || '');
         setIsEditingAmount(false);
+        setIsAskingToEditOrder(false);
         setIsEditModalOpen(true);
     };
 
@@ -229,11 +234,11 @@ const Deliveries = () => {
                                 {shipments.length > 0 ? (
                                     shipments.map((shipment) => (
                                         <tr key={shipment._id}>
-                                            <td className="font-medium">#{shipment._id?.substring(shipment._id.length - 6)}</td>
-                                            <td>{shipment.client?.fullName || 'Cliente no encontrado'}</td>
-                                            <td>{formatDate(shipment.deliveryDate)}</td>
-                                            <td className="font-semibold">S/ {(shipment.amount || 0).toFixed(2)}</td>
-                                            <td>
+                                            <td data-label="ID Entrega" className="font-medium">#{shipment._id?.substring(shipment._id.length - 6)}</td>
+                                            <td data-label="Cliente">{shipment.client?.fullName || 'Cliente no encontrado'}</td>
+                                            <td data-label="Fecha Entrega">{formatDate(shipment.deliveryDate)}</td>
+                                            <td data-label="Monto (S/.)" className="font-semibold">S/ {(shipment.amount || 0).toFixed(2)}</td>
+                                            <td data-label="Pago">
                                                 <span className={`badge ${shipment.paymentStatus === 'COMPLETED' ? 'paid' :
                                                     shipment.paymentStatus === 'INCOMPLETE' ? 'partial' :
                                                         'pending'
@@ -253,12 +258,12 @@ const Deliveries = () => {
                                                     )}
                                                 </span>
                                             </td>
-                                            <td>
+                                            <td data-label="Estado">
                                                 <span className={`badge ${shipment.status === 'DELIVERED' ? 'paid' : 'pending'} `}>
                                                     {shipment.status === 'DELIVERED' ? 'Entregado' : (shipment.status === 'CANCELLED' ? 'Cancelado' : shipment.status)}
                                                 </span>
                                             </td>
-                                            <td>
+                                            <td data-label="Acciones">
                                                 <div className="flex gap-2">
                                                     <button
                                                         className="btn-action info"
@@ -382,129 +387,152 @@ const Deliveries = () => {
                 </div>
             </Modal>
 
-            {/* Edit Delivery Modal */}
+            {/* Edit Shipment Modal */}
             <Modal
                 isOpen={isEditModalOpen}
                 onClose={() => !isLoading && setIsEditModalOpen(false)}
-                title="Modificar Entrega"
+                title={isAskingToEditOrder ? "¿Desea modificar el pedido base?" : "Modificar Entrega"}
             >
                 {selectedDelivery && (
                     <div className="edit-delivery-container">
-                        {/* Client Context Header */}
-                        <div className="delivery-context-card">
-                            <div className="client-brief">
-                                <div className="avatar-mini">
-                                    <User size={16} />
+                        {!isAskingToEditOrder ? (
+                            <>
+                                {/* Client Context Header */}
+                                <div className="delivery-context-card">
+                                    <div className="client-brief">
+                                        <div className="avatar-mini">
+                                            <User size={16} />
+                                        </div>
+                                        <div>
+                                            <h3>{selectedDelivery.client?.fullName}</h3>
+                                            <p>{formatDate(selectedDelivery.deliveryDate)} • {selectedDelivery.order?.schedule === 'morning' ? 'Turno Mañana' : 'Turno Tarde'}</p>
+                                        </div>
+                                    </div>
+                                    <div className="current-amount-badge">
+                                        <span className="label">Monto Actual</span>
+                                        <span className="value">S/ {(selectedDelivery.amount || 0).toFixed(2)}</span>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3>{selectedDelivery.client?.fullName}</h3>
-                                    <p>{formatDate(selectedDelivery.deliveryDate)} • {selectedDelivery.order?.schedule === 'morning' ? 'Turno Mañana' : 'Turno Tarde'}</p>
+
+                                <div className="amount-edit-section">
+                                    <label>Monto de la Entrega</label>
+                                    <div className={`amount-input-wrapper ${isEditingAmount ? 'focused' : ''}`}>
+                                        <DollarSign size={24} className="currency-icon" />
+                                        <input
+                                            type="number"
+                                            value={editableAmount}
+                                            onChange={(e) => setEditableAmount(Number(e.target.value))}
+                                            onFocus={() => setIsEditingAmount(true)}
+                                            onBlur={() => setIsEditingAmount(false)}
+                                            placeholder="0.00"
+                                            step="0.1"
+                                        />
+                                        <span className="currency-label">PEN</span>
+                                    </div>
+                                </div>
+
+                                <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.85rem', textTransform: 'uppercase' }}>
+                                        Notas del Envío
+                                    </label>
+                                    <div style={{ position: 'relative' }}>
+                                        <MessageSquare size={18} style={{ position: 'absolute', left: '12px', top: '12px', color: 'var(--text-secondary)' }} />
+                                        <textarea
+                                            value={editableNotes}
+                                            onChange={(e) => setEditableNotes(e.target.value)}
+                                            placeholder="Ej: Dejar en portería, cliente pagará después..."
+                                            style={{
+                                                width: '100%',
+                                                padding: '10px 10px 10px 40px',
+                                                borderRadius: '12px',
+                                                border: '1px solid var(--border-color)',
+                                                background: 'var(--bg-primary)',
+                                                color: 'var(--text-primary)',
+                                                minHeight: '100px',
+                                                resize: 'vertical',
+                                                fontSize: '0.95rem'
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="modal-actions-footer" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem', marginTop: '1rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                                    <button
+                                        className="btn-link"
+                                        onClick={() => setIsEditModalOpen(false)}
+                                        disabled={isLoading}
+                                        style={{ padding: '0.75rem 1.5rem', border: '1px solid var(--border-color)', borderRadius: '8px', background: 'transparent', color: 'var(--text-primary)', cursor: 'pointer' }}
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn-primary"
+                                        disabled={isLoading}
+                                        onClick={async () => {
+                                            if (!selectedDelivery._id) return;
+                                            try {
+                                                setIsLoading(true);
+                                                await shipmentApi.update(selectedDelivery._id, {
+                                                    amount: editableAmount,
+                                                    notes: editableNotes
+                                                });
+                                                toast.success('Entrega actualizada');
+                                                fetchDeliveries();
+                                                setIsAskingToEditOrder(true);
+                                            } catch (error) {
+                                                toast.error('Error al actualizar la entrega');
+                                            } finally {
+                                                setIsLoading(false);
+                                            }
+                                        }}
+                                        style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', border: 'none', background: 'var(--accent-color)', color: 'white', cursor: 'pointer', fontWeight: 600 }}
+                                    >
+                                        {isLoading ? 'Guardando...' : 'Guardar Cambios'}
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="prompt-container">
+                                <div className="icon-circle">
+                                    <HistoryIcon size={32} />
+                                </div>
+                                <p>
+                                    La entrega ha sido actualizada. <br />
+                                    <strong>¿Desea modificar también el pedido original</strong> para que todas las futuras entregas usen estos nuevos datos?
+                                </p>
+
+                                <div className="prompt-actions">
+                                    <button
+                                        className="btn-secondary"
+                                        onClick={() => setIsEditModalOpen(false)}
+                                        style={{ padding: '0.75rem 2rem' }}
+                                    >
+                                        No, solo esta
+                                    </button>
+                                    <button
+                                        className="btn-primary"
+                                        onClick={() => {
+                                            const orderId = selectedDelivery.order?._id;
+                                            if (orderId) {
+                                                navigate(`/admin/orders?editId=${orderId}`);
+                                            } else {
+                                                toast.error('No se pudo encontrar el pedido original');
+                                                setIsEditModalOpen(false);
+                                            }
+                                        }}
+                                        style={{ padding: '0.75rem 2rem' }}
+                                    >
+                                        Sí, modificar pedido
+                                    </button>
                                 </div>
                             </div>
-                            <div className="current-amount-badge">
-                                <span className="label">Monto Actual</span>
-                                <span className="value">S/ {(selectedDelivery.amount || 0).toFixed(2)}</span>
-                            </div>
-                        </div>
-
-                        <div className="amount-edit-section">
-                            <label>Nuevo Monto de Entrega</label>
-                            <div className={`amount - input - wrapper ${isEditingAmount ? 'focused' : ''} `}>
-                                <DollarSign size={24} className="currency-icon" />
-                                <input
-                                    type="number"
-                                    value={editableAmount}
-                                    onChange={(e) => setEditableAmount(Number(e.target.value))}
-                                    onFocus={() => setIsEditingAmount(true)}
-                                    onBlur={() => setIsEditingAmount(false)}
-                                    placeholder="0.00"
-                                    step="0.1"
-                                />
-                                <span className="currency-label">PEN</span>
-                            </div>
-                            <p className="helper-text">Ingrese el monto que se cobrará por esta entrega.</p>
-                        </div>
-
-                        <div className="update-strategies">
-                            <div className="strategy-option">
-                                <button
-                                    className="strategy-btn temporary"
-                                    disabled={isLoading}
-                                    onClick={async () => {
-                                        if (!selectedDelivery._id) return;
-                                        try {
-                                            setIsLoading(true);
-                                            await shipmentApi.update(selectedDelivery._id, { amount: editableAmount });
-                                            toast.success('Monto actualizado solo para esta entrega');
-                                            fetchDeliveries();
-                                            setIsEditModalOpen(false);
-                                        } catch (error) {
-                                            toast.error('Error al actualizar la entrega');
-                                        } finally {
-                                            setIsLoading(false);
-                                        }
-                                    }}
-                                >
-                                    <div className="icon-wrapper">
-                                        <Calendar size={20} />
-                                    </div>
-                                    <div className="btn-content">
-                                        <span className="title">Solo por hoy</span>
-                                        <span className="description">Cambia el monto únicamente para esta entrega específica.</span>
-                                    </div>
-                                </button>
-                            </div>
-
-                            <div className="strategy-option">
-                                <button
-                                    className="strategy-btn permanent"
-                                    disabled={isLoading}
-                                    onClick={async () => {
-                                        if (!selectedDelivery.order?._id) {
-                                            toast.error('No se encontró la orden original para actualizar');
-                                            return;
-                                        }
-                                        try {
-                                            setIsLoading(true);
-                                            // Update both the shipment and the underlying order
-                                            await Promise.all([
-                                                selectedDelivery._id ? shipmentApi.update(selectedDelivery._id, { amount: editableAmount }) : Promise.resolve(),
-                                                orderApi.update(selectedDelivery.order._id, { amount: editableAmount })
-                                            ]);
-                                            toast.success('Monto actualizado permanentemente para futuras entregas');
-                                            fetchDeliveries();
-                                            setIsEditModalOpen(false);
-                                        } catch (error) {
-                                            toast.error('Error al actualizar permanentemente');
-                                        } finally {
-                                            setIsLoading(false);
-                                        }
-                                    }}
-                                >
-                                    <div className="icon-wrapper">
-                                        <HistoryIcon size={20} />
-                                    </div>
-                                    <div className="btn-content">
-                                        <span className="title">De ahora en adelante</span>
-                                        <span className="description">Actualiza el monto de la orden base para todas las futuras entregas.</span>
-                                    </div>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="modal-actions-footer">
-                            <button
-                                className="btn-cancel"
-                                onClick={() => setIsEditModalOpen(false)}
-                                disabled={isLoading}
-                            >
-                                Cancelar
-                            </button>
-                        </div>
+                        )}
                     </div>
-                )}
-            </Modal>
-        </div>
+                )
+                }
+            </Modal >
+        </div >
     );
 };
 

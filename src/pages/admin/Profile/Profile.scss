@@ -204,6 +204,7 @@
 
                 input {
                     padding-left: 2.75rem;
+                    padding-right: 2.75rem;
 
                     &:disabled {
                         opacity: 0.7;
@@ -221,6 +222,34 @@
                     width: 18px;
                     height: 18px;
                     z-index: 10;
+                }
+
+                .password-toggle {
+                    position: absolute;
+                    right: 0.75rem;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    background: none;
+                    border: none;
+                    color: var(--text-secondary);
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 0.25rem;
+                    border-radius: 4px;
+                    transition: all 0.2s;
+                    z-index: 10;
+
+                    &:hover {
+                        color: var(--accent-color);
+                        background-color: var(--bg-primary);
+                    }
+
+                    svg {
+                        position: static;
+                        transform: none;
+                    }
                 }
             }
         }

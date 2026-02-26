@@ -1,4 +1,4 @@
-import { Camera, Lock, Mail, Save, Shield, User, Trash2, Phone, MapPin } from 'lucide-react';
+import { Camera, Lock, Mail, Save, Shield, User, Trash2, Phone, MapPin, Eye, EyeOff } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../../context/AuthContext';
@@ -10,6 +10,8 @@ const Profile = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isUploadingImage, setIsUploadingImage] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [formData, setFormData] = useState({
         fullName: user?.fullName || '',
@@ -313,12 +315,20 @@ const Profile = () => {
                                         <div className="input-wrapper">
                                             <Lock />
                                             <input
-                                                type="password"
+                                                type={showNewPassword ? "text" : "password"}
                                                 name="newPassword"
                                                 value={formData.newPassword}
                                                 onChange={handleInputChange}
                                                 placeholder="••••••••"
                                             />
+                                            <button
+                                                type="button"
+                                                className="password-toggle"
+                                                onClick={() => setShowNewPassword(!showNewPassword)}
+                                                tabIndex={-1}
+                                            >
+                                                {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                            </button>
                                         </div>
                                     </div>
 
@@ -327,12 +337,20 @@ const Profile = () => {
                                         <div className="input-wrapper">
                                             <Lock />
                                             <input
-                                                type="password"
+                                                type={showConfirmPassword ? "text" : "password"}
                                                 name="confirmPassword"
                                                 value={formData.confirmPassword}
                                                 onChange={handleInputChange}
                                                 placeholder="••••••••"
                                             />
+                                            <button
+                                                type="button"
+                                                className="password-toggle"
+                                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                tabIndex={-1}
+                                            >
+                                                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
