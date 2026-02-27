@@ -188,7 +188,7 @@ const Admins = () => {
                                         <td data-label="Rol">
                                             <div className="flex items-center gap-3">
                                                 <Shield size={14} className="text-text-secondary" />
-                                                {user.role === 'ADMIN' ? 'Super Admin' : 'Editor'}
+                                                {user.role === 'ADMIN' ? 'Administrador' : 'Usuario'}
                                             </div>
                                         </td>
                                         <td data-label="Estado">
@@ -269,7 +269,7 @@ const Admins = () => {
                                 onChange={handleInputChange}
                                 required
                             >
-                                <option value="USER">Editor (Acceso limitado)</option>
+                                <option value="USER">Usuario (Acceso limitado)</option>
                                 <option value="ADMIN">Administrador (Acceso total)</option>
                             </select>
                         </div>

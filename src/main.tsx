@@ -18,11 +18,18 @@ import Expenses from './pages/admin/Expenses/Expenses'
 import ClientLayout from './components/layout/ClientLayout'
 import ClientPortal from './pages/client/ClientPortal/ClientPortal'
 
-// ... existing imports
-
 import { ThemeProvider } from './context/ThemeContext'
 import { Toaster } from 'react-hot-toast'
-import { AuthProvider } from './context/AuthContext'
+import { AuthProvider, useAuth } from './context/AuthContext'
+
+/** Bloquea rutas para usuarios con rol 'user', redirige al dashboard */
+const AdminOnly = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useAuth();
+  if (user?.role === 'USER') {
+    return <Navigate to="/admin" replace />;
+  }
+  return <>{children}</>;
+};
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -44,9 +51,10 @@ createRoot(document.getElementById('root')!).render(
               <Route path="deliveries" element={<Deliveries />} />
               <Route path="orders" element={<Orders />} />
               <Route path="payments" element={<Payments />} />
-              <Route path="expenses" element={<Expenses />} />
-              <Route path="users" element={<Admins />} />
               <Route path="profile" element={<Profile />} />
+              {/* Rutas solo para admin */}
+              <Route path="expenses" element={<AdminOnly><Expenses /></AdminOnly>} />
+              <Route path="users" element={<AdminOnly><Admins /></AdminOnly>} />
             </Route>
 
             {/* Client Routes */}

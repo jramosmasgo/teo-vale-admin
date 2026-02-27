@@ -5,6 +5,7 @@ import './Sidebar.scss';
 import logoLight from '../../assets/admin/admin-logo.png';
 import logoDark from '../../assets/admin/admin-logo-dark.png';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -13,7 +14,9 @@ interface SidebarProps {
 
 const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const { theme } = useTheme();
+  const { user } = useAuth();
   const logo = theme === 'dark' ? logoDark : logoLight;
+  const isAdmin = user?.role !== 'USER';
 
   return (
     <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
@@ -59,21 +62,25 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           </li>
         </ul>
 
-        <div className="nav-label">Administración</div>
-        <ul>
-          <li>
-            <NavLink to="/admin/users" className={({ isActive }) => isActive ? 'active' : ''} onClick={onClose}>
-              <LayoutList size={20} />
-              <span>Administradores</span>
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/admin/expenses" className={({ isActive }) => isActive ? 'active' : ''} onClick={onClose}>
-              <Wallet size={20} />
-              <span>Gastos</span>
-            </NavLink>
-          </li>
-        </ul>
+        {isAdmin && (
+          <>
+            <div className="nav-label">Administración</div>
+            <ul>
+              <li>
+                <NavLink to="/admin/users" className={({ isActive }) => isActive ? 'active' : ''} onClick={onClose}>
+                  <LayoutList size={20} />
+                  <span>Administradores</span>
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/admin/expenses" className={({ isActive }) => isActive ? 'active' : ''} onClick={onClose}>
+                  <Wallet size={20} />
+                  <span>Gastos</span>
+                </NavLink>
+              </li>
+            </ul>
+          </>
+        )}
       </nav>
 
       <div className="sidebar-footer">

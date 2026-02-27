@@ -302,6 +302,10 @@
             font-weight: 600;
             color: var(--text-primary);
             font-size: 0.9rem;
+
+            @media (max-width: 768px) {
+                display: none;
+            }
         }
     }
 }

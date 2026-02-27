@@ -922,70 +922,58 @@ const ClientDetails = () => {
             {/* Orders List Modal */}
             <Modal displayCustomContent={true} title="Lista de Pedidos" isOpen={isOrdersListModalOpen} onClose={() => setIsOrdersListModalOpen(false)}>
                 <div style={{ padding: '1rem 0' }}>
-                    <div className="table-container" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                    <div className="table-container orders-modal-container">
                         {orders.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
                                 No hay pedidos registrados.
                             </div>
                         ) : (
-                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <table className="orders-modal-table">
                                 <thead>
-                                    <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
-                                        <th style={{ textAlign: 'left', padding: '1rem', color: 'var(--text-secondary)', fontWeight: 600 }}>ID</th>
-                                        <th style={{ textAlign: 'left', padding: '1rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Fecha Creación</th>
-                                        <th style={{ textAlign: 'left', padding: '1rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Días</th>
-                                        <th style={{ textAlign: 'left', padding: '1rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Turno</th>
-                                        <th style={{ textAlign: 'right', padding: '1rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Monto</th>
-                                        <th style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Estado</th>
-                                        <th style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Acciones</th>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Fecha</th>
+                                        <th>Días</th>
+                                        <th>Turno</th>
+                                        <th style={{ textAlign: 'right' }}>Monto</th>
+                                        <th style={{ textAlign: 'center' }}>Estado</th>
+                                        <th style={{ textAlign: 'center' }}>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {orders.map((order) => (
-                                        <tr key={order._id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                                            <td style={{ padding: '1rem', fontWeight: 500 }}>{order.orderCode || order._id?.substring(0, 6)}</td>
-                                            <td style={{ padding: '1rem' }}>{order.createdAt ? new Date(order.createdAt).toLocaleDateString() : '-'}</td>
-                                            <td style={{ padding: '1rem' }}>
-                                                {order.orderDays?.map(day =>
-                                                    daysOptions.find(opt => opt.value === day)?.label || day
-                                                ).join(', ')}
+                                        <tr key={order._id}>
+                                            <td data-label="Código">
+                                                <span className="order-code">{order.orderCode || order._id?.substring(0, 6)}</span>
                                             </td>
-                                            <td style={{ padding: '1rem' }}>{order.schedule === 'morning' ? 'Mañana' : 'Tarde'}</td>
-                                            <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 600 }}>S/ {order.amount?.toFixed(2) || '0.00'}</td>
-                                            <td style={{ padding: '1rem', textAlign: 'center' }}>
-                                                <span style={{
-                                                    padding: '0.25rem 0.75rem',
-                                                    borderRadius: '20px',
-                                                    fontSize: '0.75rem',
-                                                    fontWeight: 600,
-                                                    backgroundColor: order.status ? 'var(--success-color)' : 'var(--text-secondary)',
-                                                    color: 'white',
-                                                    opacity: 0.9
-                                                }}>
+                                            <td data-label="Fecha">
+                                                {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : '-'}
+                                            </td>
+                                            <td data-label="Días">
+                                                <span className="order-days">
+                                                    {order.orderDays?.map(day =>
+                                                        daysOptions.find(opt => opt.value === day)?.label || day
+                                                    ).join(', ')}
+                                                </span>
+                                            </td>
+                                            <td data-label="Turno">
+                                                {order.schedule === 'morning' ? '🌅 Mañana' : '🌆 Tarde'}
+                                            </td>
+                                            <td data-label="Monto" style={{ textAlign: 'right', fontWeight: 700, color: 'var(--accent-color)' }}>
+                                                S/ {order.amount?.toFixed(2) || '0.00'}
+                                            </td>
+                                            <td data-label="Estado" style={{ textAlign: 'center' }}>
+                                                <span className={`order-status-badge ${order.status ? 'active' : 'inactive'}`}>
                                                     {order.status ? 'Activo' : 'Inactivo'}
                                                 </span>
                                             </td>
-                                            <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
+                                            <td data-label="Acciones" style={{ textAlign: 'center' }}>
                                                 {order.status && (
                                                     <button
+                                                        className="order-generate-btn"
                                                         title="Generar entrega de hoy para este pedido"
                                                         disabled={generatingShipmentForOrder === order._id}
                                                         onClick={() => handleGenerateShipmentForOrder(order._id!)}
-                                                        style={{
-                                                            display: 'inline-flex',
-                                                            alignItems: 'center',
-                                                            gap: '0.35rem',
-                                                            padding: '0.35rem 0.65rem',
-                                                            borderRadius: '6px',
-                                                            border: '1px solid var(--accent-color)',
-                                                            background: 'transparent',
-                                                            color: 'var(--accent-color)',
-                                                            fontSize: '0.75rem',
-                                                            fontWeight: 600,
-                                                            cursor: generatingShipmentForOrder === order._id ? 'not-allowed' : 'pointer',
-                                                            opacity: generatingShipmentForOrder === order._id ? 0.6 : 1,
-                                                            transition: 'all 0.2s'
-                                                        }}
                                                     >
                                                         <Truck size={13} />
                                                         {generatingShipmentForOrder === order._id ? 'Generando...' : 'Generar hoy'}

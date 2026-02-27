@@ -204,6 +204,15 @@
     padding-top: 1.5rem;
 }
 
+// ── By default: contacts hidden, table visible ──
+.contacts-list-mobile {
+    display: none;
+}
+
+.desktop-table {
+    display: block;
+}
+
 @media (max-width: 768px) {
     .page-content {
         padding: 1rem !important;
@@ -219,7 +228,7 @@
             }
 
             button {
-                display: none; // Hide desktop button, use FAB instead
+                display: none;
             }
         }
 
@@ -227,61 +236,151 @@
             flex-direction: column;
             gap: 1rem;
             padding: 1rem;
+            border-radius: 12px;
+            border-bottom: none;
 
             .search-box {
                 width: 100%;
             }
+
+            // hide filter button on mobile
+            >button:last-child {
+                display: none;
+            }
         }
 
-        .desktop-view {
-            display: block !important;
-        }
-
-        .mobile-view {
+        // Hide desktop table on mobile
+        .desktop-table {
             display: none !important;
         }
 
-        .data-table {
-            thead {
-                display: none;
-            }
+        // Show contacts list on mobile
+        .contacts-list-mobile {
+            display: block;
+        }
+    }
+}
 
-            tr {
-                display: block;
-                padding: 1.25rem 0;
-                border-bottom: 1px solid var(--border-color);
+// ── Contacts List Styles ──
+.contacts-list-mobile {
+    background-color: var(--bg-secondary);
+    border-radius: 0 0 12px 12px;
 
-                &:last-child {
-                    border-bottom: none;
-                }
-            }
+    .contacts-loading,
+    .contacts-empty {
+        padding: 3rem 1.5rem;
+        text-align: center;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
 
-            td {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 0.5rem 0;
-                border: none;
+    .contacts-group {
+        .contacts-group-letter {
+            padding: 0.35rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--accent-color);
+            background-color: color-mix(in srgb, var(--accent-color), transparent 93%);
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+
+    }
+
+    .contact-row {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+        cursor: pointer;
+        transition: background-color 0.18s;
+        text-decoration: none;
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        &:active {
+            background-color: var(--bg-primary);
+        }
+
+        .contact-avatar {
+            flex-shrink: 0;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.04em;
+        }
+
+        .contact-info {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.1rem;
+
+            .contact-name {
                 font-size: 0.95rem;
-                text-align: right;
+                font-weight: 600;
+                color: var(--text-primary);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
 
-                &::before {
-                    content: attr(data-label);
-                    font-weight: 700;
-                    color: var(--text-secondary);
-                    font-size: 0.8rem;
-                    text-transform: uppercase;
-                    margin-right: 1rem;
-                    text-align: left;
-                }
+            .contact-alias {
+                font-size: 0.8rem;
+                color: var(--accent-color);
+                font-style: italic;
+            }
 
-                .action-buttons {
-                    justify-content: flex-end !important;
-                }
+            .contact-phone {
+                font-size: 0.8rem;
+                color: var(--text-secondary);
+            }
+        }
 
-                .badge {
-                    margin-left: auto;
+        .contact-right {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+
+            .contact-edit-btn {
+                padding: 0.35rem;
+                border-radius: 6px;
+                border: none;
+                background: transparent;
+                color: var(--text-secondary);
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.18s;
+
+                &:hover,
+                &:active {
+                    background-color: color-mix(in srgb, var(--accent-color), transparent 88%);
+                    color: var(--accent-color);
                 }
+            }
+
+            .contact-chevron {
+                color: var(--text-secondary);
+                opacity: 0.4;
             }
         }
     }

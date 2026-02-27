@@ -3,6 +3,7 @@ import { TrendingUp, CheckCircle, XCircle, FileText, Wallet } from 'lucide-react
 import { analyticsApi } from '../../../api/analytics.api';
 import { expenseApi } from '../../../api/expense.api';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../context/AuthContext';
 import toast from 'react-hot-toast';
 import './Dashboard.scss';
 
@@ -21,6 +22,8 @@ const StatCard = ({ title, value, subtext, icon: Icon, variant = 'default', isLo
 
 const Dashboard = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const isAdmin = user?.role !== 'USER';
     const [isLoading, setIsLoading] = useState(true);
     const [stats, setStats] = useState({
         todayOrders: 0,
@@ -55,7 +58,9 @@ const Dashboard = () => {
                     analyticsApi.getOrdersUpdatedThisWeek(),
                     analyticsApi.getShipmentsCancelledThisWeek(),
                     analyticsApi.getTotalUnpaidAmount(),
-                    expenseApi.getAll(1, 1, { startDate: firstDayOfMonth, endDate: lastDayOfMonth }),
+                    isAdmin
+                        ? expenseApi.getAll(1, 1, { startDate: firstDayOfMonth, endDate: lastDayOfMonth })
+                        : Promise.resolve({ expenses: [], total: 0, totalAmount: 0 }),
                 ]);
 
                 setStats({
@@ -143,20 +148,22 @@ const Dashboard = () => {
                     isLoading={isLoading}
                     onClick={() => navigate(`/admin/deliveries?status=CANCELLED&deliveryDate=${todayDate}`)}
                 />
-                <StatCard
-                    value={`S/ ${stats.todayExpenses.toFixed(2)}`}
-                    title={`Gastos de ${currentMonthName}`}
-                    subtext="Egresos este mes"
-                    icon={Wallet}
-                    variant="purple"
-                    isLoading={isLoading}
-                    onClick={() => {
-                        const now = new Date();
-                        const firstDayString = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-                        const lastDayString = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
-                        navigate(`/admin/expenses?startDate=${firstDayString}&endDate=${lastDayString}`);
-                    }}
-                />
+                {isAdmin && (
+                    <StatCard
+                        value={`S/ ${stats.todayExpenses.toFixed(2)}`}
+                        title={`Gastos de ${currentMonthName}`}
+                        subtext="Egresos este mes"
+                        icon={Wallet}
+                        variant="purple"
+                        isLoading={isLoading}
+                        onClick={() => {
+                            const now = new Date();
+                            const firstDayString = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+                            const lastDayString = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+                            navigate(`/admin/expenses?startDate=${firstDayString}&endDate=${lastDayString}`);
+                        }}
+                    />
+                )}
             </div>
         </div>
     );

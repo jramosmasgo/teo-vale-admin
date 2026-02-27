@@ -1,6 +1,6 @@
-import { useState, useEffect, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, Pencil, Search, Filter, Plus } from 'lucide-react';
+import { Eye, Pencil, Search, Filter, Plus, ChevronRight } from 'lucide-react';
 import Modal from '../../../components/ui/Modal';
 import { clientApi } from '../../../api/client.api';
 import type { Client } from '../../../types/interfaces/client.interface';
@@ -104,6 +104,36 @@ const Clients = () => {
         }
     };
 
+    // Group clients alphabetically for mobile contacts view
+    const groupedClients = useMemo(() => {
+        const groups: Record<string, Client[]> = {};
+        const sorted = [...clients].sort((a, b) =>
+            (a.fullName || '').localeCompare(b.fullName || '', 'es')
+        );
+        sorted.forEach((client) => {
+            const letter = (client.fullName?.[0] || '#').toUpperCase();
+            if (!groups[letter]) groups[letter] = [];
+            groups[letter].push(client);
+        });
+        return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
+    }, [clients]);
+
+    const getInitials = (name: string) => {
+        const parts = name.trim().split(' ');
+        if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+        return name.slice(0, 2).toUpperCase();
+    };
+
+    const getAvatarColor = (name: string) => {
+        const colors = [
+            '#5C6BC0', '#26A69A', '#EC407A', '#AB47BC',
+            '#42A5F5', '#FF7043', '#66BB6A', '#FFA726'
+        ];
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+        return colors[Math.abs(hash) % colors.length];
+    };
+
     const getModalTitle = () => {
         return modalMode === 'create' ? 'Nuevo Cliente' : 'Editar Cliente';
     };
@@ -142,8 +172,54 @@ const Clients = () => {
                     </button>
                 </div>
 
-                {/* Responsive Table */}
-                <div className="table-container">
+                {/* ── Mobile Contacts View ── */}
+                <div className="contacts-list-mobile">
+                    {isLoading ? (
+                        <div className="contacts-loading">Cargando clientes...</div>
+                    ) : clients.length === 0 ? (
+                        <div className="contacts-empty">No hay clientes registrados</div>
+                    ) : (
+                        groupedClients.map(([letter, group]) => (
+                            <div key={letter} className="contacts-group">
+                                <div className="contacts-group-letter">{letter}</div>
+                                <div className="contacts-group-items">
+                                    {group.map((client) => (
+                                        <div
+                                            key={client._id}
+                                            className="contact-row"
+                                            onClick={() => navigate(`/admin/clients/${client._id}`)}
+                                        >
+                                            <div
+                                                className="contact-avatar"
+                                                style={{ backgroundColor: getAvatarColor(client.fullName || '') }}
+                                            >
+                                                {getInitials(client.fullName || '?')}
+                                            </div>
+                                            <div className="contact-info">
+                                                <span className="contact-name">{client.fullName}</span>
+                                                {client.alias && <span className="contact-alias">{client.alias}</span>}
+                                                <span className="contact-phone">{client.phone || '-'}</span>
+                                            </div>
+                                            <div className="contact-right">
+                                                <button
+                                                    className="contact-edit-btn"
+                                                    onClick={(e) => { e.stopPropagation(); handleEdit(client); }}
+                                                    title="Editar"
+                                                >
+                                                    <Pencil size={15} />
+                                                </button>
+                                                <ChevronRight size={16} className="contact-chevron" />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+
+                {/* ── Desktop Table View ── */}
+                <div className="table-container desktop-table">
                     {isLoading ? (
                         <div className="p-4 text-center">Cargando clientes...</div>
                     ) : (

@@ -199,7 +199,7 @@ const Profile = () => {
 
                     <h2>{user?.fullName}</h2>
                     <span className="role-badge">
-                        {user?.role === 'admin' ? 'Administrador' : 'Editor'}
+                        {user?.role === 'ADMIN' ? 'Administrador' : 'Usuario'}
                     </span>
 
                     <div className="stats-mini">
@@ -266,7 +266,7 @@ const Profile = () => {
                                     <Shield />
                                     <input
                                         type="text"
-                                        value={user?.role === 'admin' ? 'Administrador' : 'Editor'}
+                                        value={user?.role === 'ADMIN' ? 'Administrador' : 'Usuario'}
                                         disabled
                                         className="bg-gray-50"
                                     />
