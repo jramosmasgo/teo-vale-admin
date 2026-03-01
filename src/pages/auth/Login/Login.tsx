@@ -36,6 +36,10 @@ const Login = () => {
                 const { token, user } = response;
 
                 if (token && user) {
+                    if (user.status === 'INACTIVE') {
+                        setError('Tu cuenta ha sido desactivada. Contacta al administrador.');
+                        return;
+                    }
                     login(user, token);
                     navigate('/admin');
                 } else {

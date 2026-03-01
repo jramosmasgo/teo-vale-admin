@@ -1,17 +1,22 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-    Pencil, Eye, Loader2, Calendar,
-    Plus, DollarSign, Tag, FileText
+    Plus, DollarSign, Tag, FileText, Settings, Trash2, PlusCircle,
+    Pencil, Eye, Loader2, Calendar
 } from 'lucide-react';
 import './Expenses.scss';
 import Modal from '../../../components/ui/Modal';
 import { expenseApi } from '../../../api/expense.api';
-import type { Expense, ExpenseCategory } from '../../../types/interfaces/expense.interface';
+import type { Expense } from '../../../types/interfaces/expense.interface';
 import { toast } from 'react-hot-toast';
 
-const CATEGORIES: ExpenseCategory[] = ['HARINA', 'MANTECA', 'LENA', 'SUELDO', 'AGUA', 'LUZ', 'ARRIENDO', 'OTRO'];
+const DEFAULT_CATEGORIES = ['HARINA', 'MANTECA', 'LENA', 'SUELDO', 'AGUA', 'LUZ', 'ARRIENDO', 'OTRO'];
 
 const Expenses = () => {
+    const [categories, setCategories] = useState<string[]>(() => {
+        const saved = localStorage.getItem('expense_categories');
+        return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
+    });
+
     const [expenses, setExpenses] = useState<Expense[]>([]);
     const [totalAmount, setTotalAmount] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
@@ -27,15 +32,45 @@ const Expenses = () => {
     const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+
+    // Category Management State
+    const [newCategoryName, setNewCategoryName] = useState('');
 
     // Form state
     const [formData, setFormData] = useState({
-        category: 'HARINA' as ExpenseCategory,
+        category: (categories[0] || 'OTRO'),
         description: '',
         amount: '',
         expenseDate: new Date().toISOString().split('T')[0],
         notes: ''
     });
+
+    const saveCategories = (updatedCategories: string[]) => {
+        setCategories(updatedCategories);
+        localStorage.setItem('expense_categories', JSON.stringify(updatedCategories));
+    };
+
+    const handleAddCategory = (e: React.FormEvent) => {
+        e.preventDefault();
+        const trimmed = newCategoryName.trim().toUpperCase();
+        if (!trimmed) return;
+        if (categories.includes(trimmed)) {
+            toast.error('La categoría ya existe');
+            return;
+        }
+        const updated = [...categories, trimmed];
+        saveCategories(updated);
+        setNewCategoryName('');
+        toast.success('Categoría añadida');
+    };
+
+    const handleDeleteCategory = (catToDelete: string) => {
+        if (!window.confirm(`¿Estás seguro de eliminar "${catToDelete}"?`)) return;
+        const updated = categories.filter(c => c !== catToDelete);
+        saveCategories(updated);
+        toast.success('Categoría eliminada');
+    };
 
     const fetchExpenses = useCallback(async () => {
         setIsLoading(true);
@@ -63,7 +98,7 @@ const Expenses = () => {
     const handleOpenCreate = () => {
         setSelectedExpense(null);
         setFormData({
-            category: 'HARINA',
+            category: (categories[0] || 'OTRO'),
             description: '',
             amount: '',
             expenseDate: new Date().toISOString().split('T')[0],
@@ -89,6 +124,7 @@ const Expenses = () => {
         try {
             const data = {
                 ...formData,
+                category: formData.category as any,
                 amount: parseFloat(formData.amount)
             };
 
@@ -116,10 +152,16 @@ const Expenses = () => {
                     <h1>Gastos de Panadería</h1>
                     <p>Gestiona y controla los egresos operativos</p>
                 </div>
-                <button className="btn-primary" onClick={handleOpenCreate}>
-                    <Plus size={20} />
-                    Nuevo Gasto
-                </button>
+                <div className="header-actions">
+                    <button className="btn-secondary" onClick={() => setIsCategoryModalOpen(true)}>
+                        <Settings size={20} />
+                        Categorías
+                    </button>
+                    <button className="btn-primary" onClick={handleOpenCreate}>
+                        <Plus size={20} />
+                        Nuevo Gasto
+                    </button>
+                </div>
             </header>
 
             <div className="stats-summary">
@@ -142,7 +184,7 @@ const Expenses = () => {
                         onChange={(e) => setCategoryFilter(e.target.value)}
                     >
                         <option value="">Todas</option>
-                        {CATEGORIES.map(cat => (
+                        {categories.map(cat => (
                             <option key={cat} value={cat}>{cat}</option>
                         ))}
                     </select>
@@ -248,10 +290,10 @@ const Expenses = () => {
                         <label>Categoría</label>
                         <select
                             value={formData.category}
-                            onChange={(e) => setFormData({ ...formData, category: e.target.value as ExpenseCategory })}
+                            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                             required
                         >
-                            {CATEGORIES.map(cat => (
+                            {categories.map(cat => (
                                 <option key={cat} value={cat}>{cat}</option>
                             ))}
                         </select>
@@ -352,6 +394,49 @@ const Expenses = () => {
             </Modal>
 
 
+            {/* Category Management Modal */}
+            <Modal
+                isOpen={isCategoryModalOpen}
+                onClose={() => setIsCategoryModalOpen(false)}
+                title="Administrar Categorías"
+            >
+                <div className="category-manager">
+                    <form className="add-category-form" onSubmit={handleAddCategory}>
+                        <input
+                            type="text"
+                            placeholder="Nueva categoría (ej: GAS)"
+                            value={newCategoryName}
+                            onChange={(e) => setNewCategoryName(e.target.value)}
+                            required
+                        />
+                        <button type="submit" className="btn-icon-primary">
+                            <PlusCircle size={24} />
+                        </button>
+                    </form>
+
+                    <div className="categories-list">
+                        {categories.map(cat => (
+                            <div key={cat} className="category-item">
+                                <span>{cat}</span>
+                                <button
+                                    className="btn-delete-mini"
+                                    onClick={() => handleDeleteCategory(cat)}
+                                    title="Eliminar categoría"
+                                >
+                                    <Trash2 size={16} />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="modal-footer-info">
+                        <p>Estas categorías se guardan localmente en tu navegador.</p>
+                        <button className="btn-primary" onClick={() => setIsCategoryModalOpen(false)}>
+                            Listo
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 };

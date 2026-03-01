@@ -244,27 +244,48 @@
     width: 32px;
     height: 32px;
     border-radius: 6px;
-    border: none;
+    border: 1px solid transparent;
     cursor: pointer;
     transition: all 0.2s;
     background-color: transparent;
 
     &.success {
         color: var(--success-color);
+        background-color: color-mix(in srgb, var(--success-color), transparent 88%);
+        border-color: color-mix(in srgb, var(--success-color), transparent 72%);
 
         &:hover {
-            background-color: color-mix(in srgb, var(--success-color), transparent 85%);
+            background-color: color-mix(in srgb, var(--success-color), transparent 75%);
+            border-color: color-mix(in srgb, var(--success-color), transparent 50%);
+            transform: scale(1.08);
         }
     }
 
     &.info {
         color: #3b82f6;
+        background-color: rgba(59, 130, 246, 0.12);
+        border-color: rgba(59, 130, 246, 0.28);
 
         &:hover {
-            background-color: rgba(59, 130, 246, 0.1);
+            background-color: rgba(59, 130, 246, 0.22);
+            border-color: rgba(59, 130, 246, 0.5);
+            transform: scale(1.08);
+        }
+    }
+
+    &.danger {
+        color: var(--error-color);
+        background-color: color-mix(in srgb, var(--error-color), transparent 88%);
+        border-color: color-mix(in srgb, var(--error-color), transparent 72%);
+
+        &:hover {
+            background-color: color-mix(in srgb, var(--error-color), transparent 75%);
+            border-color: color-mix(in srgb, var(--error-color), transparent 50%);
+            transform: scale(1.08);
         }
     }
 }
+
 
 // Payment Details Modal Styles
 .payment-details-modal {

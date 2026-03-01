@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, User, Mail, Lock, Shield, Edit2, Trash2, MapPin, Eye, EyeOff } from 'lucide-react';
+import { Plus, User, Mail, Lock, Shield, Edit2, UserX, UserCheck, MapPin, Eye, EyeOff } from 'lucide-react';
 import Modal from '../../../components/ui/Modal';
 import { userApi } from '../../../api/user.api';
 import type { User as UserInterface } from '../../../types/interfaces/user.interface';
@@ -104,18 +104,20 @@ const Admins = () => {
         setIsModalOpen(true);
     };
 
-    const handleDelete = async (userId: string, userName: string) => {
-        const confirmed = window.confirm(`¿Está seguro de eliminar al usuario "${userName}"? Esta acción no se puede deshacer.`);
+    const handleToggleStatus = async (user: UserInterface) => {
+        const isActive = user.status === 'ACTIVE';
+        const action = isActive ? 'desactivar' : 'activar';
+        const confirmed = window.confirm(`¿Está seguro de ${action} al usuario "${user.fullName}"?`);
 
         if (!confirmed) return;
 
         try {
-            await userApi.delete(userId);
-            toast.success('Usuario eliminado exitosamente');
+            await userApi.update(user._id || '', { status: isActive ? 'INACTIVE' : 'ACTIVE' });
+            toast.success(`Usuario ${isActive ? 'desactivado' : 'activado'} exitosamente`);
             fetchUsers();
         } catch (error: any) {
-            console.error('Error deleting user:', error);
-            toast.error(error.response?.data?.message || 'Error al eliminar usuario');
+            console.error('Error updating user status:', error);
+            toast.error(error.response?.data?.message || 'Error al actualizar estado del usuario');
         }
     };
 
@@ -206,12 +208,13 @@ const Admins = () => {
                                                     <Edit2 size={18} />
                                                 </button>
                                                 <button
-                                                    className="btn-icon-action danger"
-                                                    style={{ color: 'var(--error-color)' }}
-                                                    title="Eliminar"
-                                                    onClick={() => handleDelete(user._id || '', user.fullName || '')}
+                                                    className={`btn-icon-action ${user.status === 'ACTIVE' ? 'danger' : 'success'}`}
+                                                    title={user.status === 'ACTIVE' ? 'Desactivar usuario' : 'Activar usuario'}
+                                                    onClick={() => handleToggleStatus(user)}
                                                 >
-                                                    <Trash2 size={18} />
+                                                    {user.status === 'ACTIVE'
+                                                        ? <UserX size={18} />
+                                                        : <UserCheck size={18} />}
                                                 </button>
                                             </div>
                                         </td>
