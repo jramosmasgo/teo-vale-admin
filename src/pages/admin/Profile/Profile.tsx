@@ -204,7 +204,7 @@ const Profile = () => {
 
                     <div className="stats-mini">
                         <div className="stat-item">
-                            <span className="val">{user?.isActive !== undefined ? (user.isActive ? 'Activo' : 'Inactivo') : 'Activo'}</span>
+                            <span className="val">{user?.status === 'ACTIVE' ? 'Activo' : user?.status === 'INACTIVE' ? 'Inactivo' : 'Activo'}</span>
                             <span className="lbl">Estado</span>
                         </div>
                     </div>
